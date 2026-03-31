@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { PText, usePreparedText, usePretextLayout } from '@santjc/react-pretext'
 
 function buildFont(fontWeight: number, fontSize: number) {
@@ -19,66 +20,130 @@ function MeasurePage() {
   const layout = usePretextLayout({ prepared, width, lineHeight })
 
   return (
-    <main className="page showcase-page">
-      <section className="showcase-header">
-        <p className="eyebrow">Measurement</p>
-        <h2 className="page-title">prepare + layout as React primitives</h2>
-        <p className="page-copy">This route exists to show the package API in the same shape as pretext itself.</p>
-        <div className="status-row"><span className="status-tag">Stable</span></div>
-      </section>
+    <div className="page">
+      <header className="page-header">
+        <div className="page-breadcrumb">
+          <Link to="/">Home</Link>
+          <span>/</span>
+          <span>Measure</span>
+        </div>
+        <h1 className="page-title">Measurement Primitives</h1>
+        <p className="page-description">
+          Direct React wrappers around prepare and layout. This route shows the package API in the same shape as pretext itself.
+        </p>
+        <div className="page-status">
+          <span className="showcase-card-badge stable">Stable</span>
+        </div>
+      </header>
 
-      <section className="showcase-grid">
-        <aside className="panel controls-panel">
+      <div className="demo-grid">
+        <aside className="controls">
+          <span className="controls-title">Controls</span>
+          
           <label className="field">
-            <span>Text</span>
-            <textarea value={text} rows={7} onChange={(event) => setText(event.target.value)} />
+            <span className="field-label">Text</span>
+            <textarea
+              value={text}
+              rows={5}
+              onChange={(event) => setText(event.target.value)}
+            />
           </label>
+          
           <label className="field">
-            <span>Width: {width}px</span>
-            <input type="range" min="180" max="560" value={width} onChange={(event) => setWidth(Number(event.target.value))} />
+            <div className="field-label">
+              <span>Width</span>
+              <span className="field-value">{width}px</span>
+            </div>
+            <input
+              type="range"
+              min="180"
+              max="560"
+              value={width}
+              onChange={(event) => setWidth(Number(event.target.value))}
+            />
           </label>
+          
           <label className="field">
-            <span>Font size: {fontSize}px</span>
-            <input type="range" min="12" max="40" value={fontSize} onChange={(event) => setFontSize(Number(event.target.value))} />
+            <div className="field-label">
+              <span>Font size</span>
+              <span className="field-value">{fontSize}px</span>
+            </div>
+            <input
+              type="range"
+              min="12"
+              max="40"
+              value={fontSize}
+              onChange={(event) => setFontSize(Number(event.target.value))}
+            />
           </label>
+          
           <label className="field">
-            <span>Line height: {lineHeight}px</span>
-            <input type="range" min="16" max="56" value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} />
+            <div className="field-label">
+              <span>Line height</span>
+              <span className="field-value">{lineHeight}px</span>
+            </div>
+            <input
+              type="range"
+              min="16"
+              max="56"
+              value={lineHeight}
+              onChange={(event) => setLineHeight(Number(event.target.value))}
+            />
           </label>
+          
           <label className="field">
-            <span>Font weight</span>
-            <select value={fontWeight} onChange={(event) => setFontWeight(Number(event.target.value))}>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="500">500</option>
-              <option value="600">600</option>
-              <option value="700">700</option>
+            <span className="field-label">Font weight</span>
+            <select
+              value={fontWeight}
+              onChange={(event) => setFontWeight(Number(event.target.value))}
+            >
+              <option value="300">300 - Light</option>
+              <option value="400">400 - Regular</option>
+              <option value="500">500 - Medium</option>
+              <option value="600">600 - Semibold</option>
+              <option value="700">700 - Bold</option>
             </select>
           </label>
         </aside>
 
-        <section className="panel display-panel">
-          <div className="metrics-inline">
-            <div className="metric-box"><span>Prepare</span><strong>{prepareMs.toFixed(3)}ms</strong></div>
-            <div className="metric-box"><span>Lines</span><strong>{layout.lineCount}</strong></div>
-            <div className="metric-box"><span>Height</span><strong>{layout.height}px</strong></div>
+        <section className="display">
+          <div className="metrics">
+            <div className="metric">
+              <span className="metric-label">Prepare</span>
+              <span className="metric-value">{prepareMs.toFixed(3)}ms</span>
+            </div>
+            <div className="metric">
+              <span className="metric-label">Lines</span>
+              <span className="metric-value">{layout.lineCount}</span>
+            </div>
+            <div className="metric">
+              <span className="metric-label">Height</span>
+              <span className="metric-value">{layout.height}px</span>
+            </div>
           </div>
 
-          <div className="preview-lane" style={{ width: `${width}px` }}>
-            <PText
-              as="p"
-              width={width}
-              font={font}
-              lineHeight={lineHeight}
-              className="preview-copy"
-              style={{ fontFamily: 'GeistVariable, sans-serif', fontSize: `${fontSize}px`, fontWeight, lineHeight: `${lineHeight}px` }}
-            >
-              {text}
-            </PText>
+          <div className="preview">
+            <div className="preview-inner" style={{ width: `${width}px` }}>
+              <PText
+                as="p"
+                width={width}
+                font={font}
+                lineHeight={lineHeight}
+                style={{
+                  margin: 0,
+                  fontFamily: 'GeistVariable, sans-serif',
+                  fontSize: `${fontSize}px`,
+                  fontWeight,
+                  lineHeight: `${lineHeight}px`,
+                }}
+              >
+                {text}
+              </PText>
+            </div>
           </div>
         </section>
-      </section>
-    </main>
+      </div>
+    </div>
   )
 }
 

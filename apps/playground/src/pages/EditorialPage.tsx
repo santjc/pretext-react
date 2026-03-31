@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import {
   PText,
   useElementWidth,
@@ -91,41 +92,131 @@ function EditorialPage() {
   }, [body, scaffold])
 
   return (
-    <main className="page showcase-page">
-      <section className="showcase-header">
-        <p className="eyebrow">Experimental</p>
-        <h2 className="page-title">Editorial flow MVP over layoutNextLine</h2>
-        <p className="page-copy">The title is semantic DOM. The body is manual line composition. That split is intentional.</p>
-        <div className="status-row"><span className="status-tag">Experimental</span></div>
-      </section>
+    <div className="page">
+      <header className="page-header">
+        <div className="page-breadcrumb">
+          <Link to="/">Home</Link>
+          <span>/</span>
+          <span>Editorial</span>
+        </div>
+        <h1 className="page-title">Editorial Flow</h1>
+        <p className="page-description">
+          A headline in semantic DOM and a body flowed line by line around a fixed obstacle. The title is semantic DOM. The body is manual line composition.
+        </p>
+        <div className="page-status">
+          <span className="showcase-card-badge experimental">Experimental</span>
+        </div>
+      </header>
 
-      <section className="panel controls-inline-panel">
-        <label className="field"><span>Font size: {fontSize}px</span><input type="range" min="12" max="28" value={fontSize} onChange={(event) => setFontSize(Number(event.target.value))} /></label>
-        <label className="field"><span>Line height: {lineHeight}px</span><input type="range" min="18" max="44" value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} /></label>
-        <label className="field"><span>Font weight</span><select value={fontWeight} onChange={(event) => setFontWeight(Number(event.target.value))}><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option></select></label>
-      </section>
+      <div className="controls-inline">
+        <label className="field">
+          <div className="field-label">
+            <span>Font size</span>
+            <span className="field-value">{fontSize}px</span>
+          </div>
+          <input
+            type="range"
+            min="12"
+            max="28"
+            value={fontSize}
+            onChange={(event) => setFontSize(Number(event.target.value))}
+          />
+        </label>
+        <label className="field">
+          <div className="field-label">
+            <span>Line height</span>
+            <span className="field-value">{lineHeight}px</span>
+          </div>
+          <input
+            type="range"
+            min="18"
+            max="44"
+            value={lineHeight}
+            onChange={(event) => setLineHeight(Number(event.target.value))}
+          />
+        </label>
+        <label className="field">
+          <span className="field-label">Font weight</span>
+          <select
+            value={fontWeight}
+            onChange={(event) => setFontWeight(Number(event.target.value))}
+          >
+            <option value="300">300 - Light</option>
+            <option value="400">400 - Regular</option>
+            <option value="500">500 - Medium</option>
+            <option value="600">600 - Semibold</option>
+            <option value="700">700 - Bold</option>
+          </select>
+        </label>
+      </div>
 
-      <section className="panel editorial-page-panel">
-        <div className="metrics-inline compact-metrics">
-          <div className="metric-box"><span>Body lines</span><strong>{layout?.body.lineCount ?? 0}</strong></div>
-          <div className="metric-box"><span>Body height</span><strong>{Math.round(layout?.body.height ?? 0)}px</strong></div>
-          <div className="metric-box"><span>Exhausted</span><strong>{layout?.body.exhausted ? 'yes' : 'no'}</strong></div>
+      <div className="display">
+        <div className="metrics">
+          <div className="metric">
+            <span className="metric-label">Body lines</span>
+            <span className="metric-value">{layout?.body.lineCount ?? 0}</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Body height</span>
+            <span className="metric-value">{Math.round(layout?.body.height ?? 0)}px</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Exhausted</span>
+            <span className="metric-value">{layout?.body.exhausted ? 'yes' : 'no'}</span>
+          </div>
         </div>
 
         <div ref={ref} className="editorial-stage" style={{ height: `${layout?.stageHeight ?? 640}px` }}>
           {layout && (
             <>
-              <PText as="h1" width={layout.titleWidth} font="700 72px GeistVariable, sans-serif" lineHeight={68} className="editorial-headline" style={{ width: `${layout.titleWidth}px`, fontFamily: 'GeistVariable, sans-serif', fontSize: '72px', fontWeight: 700, lineHeight: '68px' }}>{headline}</PText>
+              <PText
+                as="h1"
+                width={layout.titleWidth}
+                font="700 64px GeistVariable, sans-serif"
+                lineHeight={60}
+                className="editorial-headline"
+                style={{
+                  width: `${layout.titleWidth}px`,
+                  fontFamily: 'GeistVariable, sans-serif',
+                  fontSize: '64px',
+                  fontWeight: 700,
+                  lineHeight: '60px',
+                }}
+              >
+                {headline}
+              </PText>
               <p className="editorial-byline">@santjc/react-pretext</p>
-              <div className="editorial-orb" style={{ left: `${layout.orb.x - layout.orb.size / 2}px`, top: `${layout.orb.y - layout.orb.size / 2}px`, width: `${layout.orb.size}px`, height: `${layout.orb.size}px` }} />
+              <div
+                className="editorial-orb"
+                style={{
+                  left: `${layout.orb.x - layout.orb.size / 2}px`,
+                  top: `${layout.orb.y - layout.orb.size / 2}px`,
+                  width: `${layout.orb.size}px`,
+                  height: `${layout.orb.size}px`,
+                }}
+              />
               {layout.body.lines.map((line, index) => (
-                <div key={`${line.start.segmentIndex}-${line.start.graphemeIndex}-${index}`} className="editorial-line" style={{ left: `${line.x}px`, top: `${line.y}px`, width: `${Math.ceil(line.width)}px`, fontFamily: 'GeistVariable, sans-serif', fontSize: `${fontSize}px`, fontWeight, lineHeight: `${lineHeight}px` }}>{line.text}</div>
+                <div
+                  key={`${line.start.segmentIndex}-${line.start.graphemeIndex}-${index}`}
+                  className="editorial-line"
+                  style={{
+                    left: `${line.x}px`,
+                    top: `${line.y}px`,
+                    width: `${Math.ceil(line.width)}px`,
+                    fontFamily: 'GeistVariable, sans-serif',
+                    fontSize: `${fontSize}px`,
+                    fontWeight,
+                    lineHeight: `${lineHeight}px`,
+                  }}
+                >
+                  {line.text}
+                </div>
               ))}
             </>
           )}
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   )
 }
 
