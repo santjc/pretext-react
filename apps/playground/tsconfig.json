@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "paths": {
+      "@santjc/react-pretext": ["../../packages/react-pretext/src/index.ts"],
+      "@santjc/react-pretext/experimental": ["../../packages/react-pretext/src/experimental.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}
