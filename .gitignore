@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 /docs
+.agents
+.claude
 
 
 # Editor directories and files
@@ -24,3 +26,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+skills-lock.json
