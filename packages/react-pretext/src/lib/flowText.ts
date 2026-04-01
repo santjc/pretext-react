@@ -1,15 +1,14 @@
 import { layoutNextLine, type LayoutCursor, type PreparedTextWithSegments } from '@chenglou/pretext'
-
-type LineSlot = {
-  left: number
-  right: number
-}
+import type { LineSlot } from './lineSlots'
 
 type PositionedLine = {
   text: string
   x: number
   y: number
   width: number
+  slotLeft: number
+  slotRight: number
+  slotWidth: number
   start: LayoutCursor
   end: LayoutCursor
 }
@@ -19,6 +18,7 @@ type TextFlowInput = {
   lineHeight: number
   getLineSlotAtY: (y: number) => LineSlot | null
   startY?: number
+  startCursor?: LayoutCursor
   maxLines?: number
   maxY?: number
   maxSteps?: number
@@ -27,8 +27,9 @@ type TextFlowInput = {
 type TextFlowResult = {
   lines: PositionedLine[]
   height: number
-  lineCount: number
   exhausted: boolean
+  truncated: boolean
+  endCursor: LayoutCursor
 }
 
 const initialCursor: LayoutCursor = {
@@ -41,21 +42,24 @@ function flowText({
   lineHeight,
   getLineSlotAtY,
   startY = 0,
+  startCursor = initialCursor,
   maxLines,
   maxY,
   maxSteps = 2000,
 }: TextFlowInput): TextFlowResult {
   const lines: PositionedLine[] = []
   let y = startY
-  let cursor = initialCursor
+  let cursor = startCursor
   let exhausted = false
+  let truncated = false
+  let step = 0
 
-  for (let step = 0; step < maxSteps; step += 1) {
+  for (; step < maxSteps; step += 1) {
     if (maxLines !== undefined && lines.length >= maxLines) {
       break
     }
 
-    if (maxY !== undefined && y >= maxY) {
+    if (maxY !== undefined && y + lineHeight > maxY) {
       break
     }
 
@@ -76,6 +80,9 @@ function flowText({
       x: lineSlot.left,
       y,
       width: line.width,
+      slotLeft: lineSlot.left,
+      slotRight: lineSlot.right,
+      slotWidth: lineSlot.right - lineSlot.left,
       start: line.start,
       end: line.end,
     })
@@ -84,13 +91,23 @@ function flowText({
     y += lineHeight
   }
 
+  if (!exhausted && step >= maxSteps) {
+    truncated = true
+  }
+
+  if (!exhausted && !truncated && layoutNextLine(prepared, cursor, 1) === null) {
+    exhausted = true
+  }
+
   return {
     lines,
     height: Math.max(0, y - startY),
-    lineCount: lines.length,
     exhausted,
+    truncated,
+    endCursor: cursor,
   }
 }
 
 export { flowText }
-export type { LineSlot, PositionedLine, TextFlowInput, TextFlowResult }
+export { initialCursor }
+export type { PositionedLine, TextFlowInput, TextFlowResult }

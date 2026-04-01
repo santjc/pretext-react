@@ -23,8 +23,19 @@ describe('usePreparedText', () => {
 
     expect(prepareMock).toHaveBeenCalledWith('hello', '400 16px Georgia', undefined)
     expect(result.current.prepared).toEqual({ id: 'prepared' })
-    expect(result.current.prepareMs).toBe(1.5)
+    expect(result.current.prepareMs).toBeUndefined()
     expect(result.current.isReady).toBe(true)
+    expect(profilePrepareMock).not.toHaveBeenCalled()
+  })
+
+  it('profiles preparation only when enabled explicitly', () => {
+    const { result } = renderHook(() =>
+      usePreparedText({ text: 'hello', font: '400 16px Georgia', enableProfiling: true }),
+    )
+
+    expect(prepareMock).toHaveBeenCalledWith('hello', '400 16px Georgia', undefined)
+    expect(profilePrepareMock).toHaveBeenCalledWith('hello', '400 16px Georgia', undefined)
+    expect(result.current.prepareMs).toBe(1.5)
   })
 
   it('returns empty state when disabled', () => {
@@ -32,6 +43,18 @@ describe('usePreparedText', () => {
 
     expect(prepareMock).not.toHaveBeenCalled()
     expect(result.current.prepared).toBeNull()
+    expect(result.current.prepareMs).toBeUndefined()
     expect(result.current.isReady).toBe(false)
+  })
+
+  it('does not recompute for equivalent inline options across rerenders', () => {
+    const { rerender } = renderHook(() =>
+      usePreparedText({ text: 'hello', font: '400 16px Georgia', options: { whiteSpace: 'pre-wrap' } }),
+    )
+
+    rerender()
+
+    expect(prepareMock).toHaveBeenCalledTimes(1)
+    expect(profilePrepareMock).not.toHaveBeenCalled()
   })
 })

@@ -15,6 +15,8 @@ type UsePreparedSegmentsResult = {
 }
 
 function usePreparedSegments({ text, font, options, enabled = true }: UsePreparedSegmentsInput): UsePreparedSegmentsResult {
+  const whiteSpace = options?.whiteSpace
+
   return useMemo(() => {
     if (!enabled || text.length === 0 || font.length === 0) {
       return {
@@ -24,10 +26,10 @@ function usePreparedSegments({ text, font, options, enabled = true }: UsePrepare
     }
 
     return {
-      prepared: prepareWithSegments(text, font, options),
+      prepared: prepareWithSegments(text, font, whiteSpace === undefined ? undefined : { whiteSpace }),
       isReady: true,
     }
-  }, [enabled, font, options, text])
+  }, [enabled, font, text, whiteSpace])
 }
 
 export { usePreparedSegments }

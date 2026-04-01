@@ -21,4 +21,14 @@ describe('usePreparedSegments', () => {
     expect(result.current.prepared).toEqual({ id: 'segmented' })
     expect(result.current.isReady).toBe(true)
   })
+
+  it('does not recompute for equivalent inline options across rerenders', () => {
+    const { rerender } = renderHook(() =>
+      usePreparedSegments({ text: 'hello', font: '400 16px Georgia', options: { whiteSpace: 'pre-wrap' } }),
+    )
+
+    rerender()
+
+    expect(prepareWithSegmentsMock).toHaveBeenCalledTimes(1)
+  })
 })

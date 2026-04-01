@@ -10,8 +10,6 @@ type BlockedLineRange = {
 
 type GetBlockedLineRanges = (lineTop: number, lineBottom: number) => BlockedLineRange[]
 
-type PickLineSlot = (lineSlots: LineSlot[], lineTop: number, lineBottom: number) => LineSlot | null
-
 type LineSlotResolver = (y: number) => LineSlot | null
 
 type CreateLineSlotResolverInput = {
@@ -19,7 +17,6 @@ type CreateLineSlotResolverInput = {
   lineHeight: number
   minWidth?: number
   getBlockedLineRanges?: GetBlockedLineRanges
-  pickLineSlot?: PickLineSlot
 }
 
 type CircleLineRangeInput = {
@@ -111,7 +108,6 @@ function createLineSlotResolver({
   lineHeight,
   minWidth = 24,
   getBlockedLineRanges = () => [],
-  pickLineSlot = (lineSlots) => pickWidestLineSlot(lineSlots),
 }: CreateLineSlotResolverInput): LineSlotResolver {
   return (y: number) => {
     const lineTop = y
@@ -119,9 +115,9 @@ function createLineSlotResolver({
     const blockedLineRanges = getBlockedLineRanges(lineTop, lineBottom)
     const lineSlots = carveLineSlots(baseLineSlot, blockedLineRanges, minWidth)
 
-    return pickLineSlot(lineSlots, lineTop, lineBottom)
+    return pickWidestLineSlot(lineSlots)
   }
 }
 
 export { carveLineSlots, createLineSlotResolver, getCircleBlockedLineRangeForRow, pickWidestLineSlot }
-export type { LineSlot, BlockedLineRange, GetBlockedLineRanges, PickLineSlot, LineSlotResolver, CreateLineSlotResolverInput, CircleLineRangeInput }
+export type { LineSlot, BlockedLineRange, GetBlockedLineRanges, LineSlotResolver, CreateLineSlotResolverInput, CircleLineRangeInput }

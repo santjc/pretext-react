@@ -9,33 +9,35 @@ type UsePreparedTextInput = {
   text: string
   font: string
   options?: PrepareOptions
+  enableProfiling?: boolean
   enabled?: boolean
 }
 
 type UsePreparedTextResult = {
   prepared: PreparedText | null
-  prepareMs: number
+  prepareMs?: number
   isReady: boolean
 }
 
-function usePreparedText({ text, font, options, enabled = true }: UsePreparedTextInput): UsePreparedTextResult {
+function usePreparedText({ text, font, options, enableProfiling = false, enabled = true }: UsePreparedTextInput): UsePreparedTextResult {
+  const whiteSpace = options?.whiteSpace
+
   return useMemo(() => {
     if (!enabled || text.length === 0 || font.length === 0) {
       return {
         prepared: null,
-        prepareMs: 0,
         isReady: false,
       }
     }
 
-    const profile = profilePrepare(text, font, options)
+    const normalizedOptions = whiteSpace === undefined ? undefined : { whiteSpace }
 
     return {
-      prepared: prepare(text, font, options),
-      prepareMs: profile.totalMs,
+      prepared: prepare(text, font, normalizedOptions),
+      ...(enableProfiling ? { prepareMs: profilePrepare(text, font, normalizedOptions).totalMs } : {}),
       isReady: true,
     }
-  }, [enabled, font, options, text])
+  }, [enableProfiling, enabled, font, text, whiteSpace])
 }
 
 export { usePreparedText }
