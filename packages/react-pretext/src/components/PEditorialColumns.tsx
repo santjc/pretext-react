@@ -13,6 +13,7 @@ import {
   type EditorialTrack,
   type ResolvedEditorialTrack,
 } from '../lib/editorialTracks'
+import { FlowLines } from './FlowLines'
 import { renderResolvedEditorialFigure } from './renderResolvedEditorialFigure'
 
 type EditorialColumnsProps = {
@@ -133,24 +134,7 @@ function EditorialColumns({
           }}
         >
           {track.figures.map(renderResolvedEditorialFigure)}
-          {track.body.lines.map((line: EditorialPositionedLine, lineIndex) => (
-            <div
-              key={`${trackIndex}-${line.start.segmentIndex}-${line.start.graphemeIndex}-${lineIndex}`}
-              style={{
-                position: 'absolute',
-                left: `${line.slotLeft}px`,
-                top: `${line.y}px`,
-                width: `${Math.ceil(line.slotWidth)}px`,
-                font,
-                lineHeight: `${lineHeight}px`,
-                whiteSpace: 'pre',
-                textAlign: 'left',
-                wordSpacing: lineRenderMode === 'justify' && line.justifyWordSpacing !== null ? `${line.justifyWordSpacing}px` : undefined,
-              }}
-            >
-              {lineRenderMode === 'justify' && line.justifyWordSpacing !== null ? line.text.trimEnd() : line.text}
-            </div>
-          ))}
+          <FlowLines lines={track.body.lines} font={font} lineHeight={lineHeight} lineRenderMode={lineRenderMode} />
         </div>
       ))}
       </div>

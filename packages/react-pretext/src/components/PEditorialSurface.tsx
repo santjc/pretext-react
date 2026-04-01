@@ -4,8 +4,8 @@ import { useElementWidth } from '../hooks/useElementWidth'
 import { usePreparedSegments } from '../hooks/usePreparedSegments'
 import type { PrepareOptions } from '../hooks/usePreparedText'
 import type { EditorialFigure } from '../lib/editorialFigures'
-import type { EditorialPositionedLine } from '../lib/editorialLineAnnotation'
 import { layoutEditorialTrack } from '../lib/layoutEditorialTrack'
+import { FlowLines } from './FlowLines'
 import { renderResolvedEditorialFigure } from './renderResolvedEditorialFigure'
 
 type EditorialSurfaceProps = {
@@ -77,24 +77,7 @@ function EditorialSurface({
       }}
     >
       {layout.figures.map(renderResolvedEditorialFigure)}
-      {layout.body.lines.map((line: EditorialPositionedLine, index) => (
-        <div
-          key={`${line.start.segmentIndex}-${line.start.graphemeIndex}-${index}`}
-          style={{
-            position: 'absolute',
-            left: `${line.slotLeft}px`,
-            top: `${line.y}px`,
-            width: `${Math.ceil(line.slotWidth)}px`,
-            font,
-            lineHeight: `${lineHeight}px`,
-            whiteSpace: 'pre',
-            textAlign: 'left',
-            wordSpacing: lineRenderMode === 'justify' && line.justifyWordSpacing !== null ? `${line.justifyWordSpacing}px` : undefined,
-          }}
-        >
-          {lineRenderMode === 'justify' && line.justifyWordSpacing !== null ? line.text.trimEnd() : line.text}
-        </div>
-      ))}
+      <FlowLines lines={layout.body.lines} font={font} lineHeight={lineHeight} lineRenderMode={lineRenderMode} />
     </div>
   )
 }

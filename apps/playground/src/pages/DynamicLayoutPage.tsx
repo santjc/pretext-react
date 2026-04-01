@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePreparedSegments } from '@santjc/react-pretext'
-import { createLineSlotResolver, getCircleBlockedLineRangeForRow, useTextFlow } from '@santjc/react-pretext/editorial'
+import { FlowLines, createLineSlotResolver, getCircleBlockedLineRangeForRow, useTextFlow } from '@santjc/react-pretext/editorial'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 
 const dynamicTitle = 'Dynamic layouts can reroute headlines and body copy around fixed obstacles without asking the browser for text measurements.'
@@ -163,17 +163,18 @@ function DynamicLayoutPage() {
               <div className="dynamic-orb dynamic-orb-outline" style={{ left: `${obstacleB.x - obstacleB.radius}px`, top: `${obstacleB.y - obstacleB.radius}px`, width: `${obstacleB.radius * 2}px`, height: `${obstacleB.radius * 2}px` }} />
               <div className="dynamic-orb dynamic-orb-soft" style={{ left: `${obstacleC.x - obstacleC.radius}px`, top: `${obstacleC.y - obstacleC.radius}px`, width: `${obstacleC.radius * 2}px`, height: `${obstacleC.radius * 2}px` }} />
 
-              {titleFlow.lines.map((line, index) => (
-                <div key={`title-${index}`} className="dynamic-title-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: titleFont, lineHeight: '42px' }}>
-                  {line.text}
-                </div>
-              ))}
+              <FlowLines lines={titleFlow.lines} font={titleFont} lineHeight={42} lineClassName="dynamic-title-line" />
 
-              {bodyFlow.lines.map((line, index) => (
-                <div key={`body-${index}`} className="dynamic-body-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: bodyFont, lineHeight: `${lineHeight}px`, whiteSpace: 'pre' }}>
-                  {line.text}
-                </div>
-              ))}
+              <FlowLines
+                lines={bodyFlow.lines}
+                font={bodyFont}
+                lineHeight={lineHeight}
+                renderLine={({ key, line, text, style }) => (
+                  <p key={key} className="dynamic-body-line" data-line-start={line.start.graphemeIndex} style={{ ...style, margin: 0 }}>
+                    {text}
+                  </p>
+                )}
+              />
             </div>
           </div>
         </section>

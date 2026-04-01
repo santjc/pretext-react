@@ -153,6 +153,7 @@ Editorial helpers live on the advanced `editorial` subpath:
 
 ```ts
 import {
+  FlowLines,
   useTextFlow,
   flowText,
   carveLineSlots,
@@ -169,6 +170,8 @@ import {
 These APIs are public and tested, but they are not part of the default root adoption path.
 
 Reach for them when you need custom line rendering, obstacle-aware flow, or multi-column continuation.
+
+`FlowLines` is the intended bridge for direct `useTextFlow` consumers: it provides the default absolute-positioned line shell and a `renderLine` escape hatch for semantics, annotations, and custom styling.
 
 ## Caveats
 

@@ -232,6 +232,7 @@ Editorial APIs are available from the advanced `editorial` subpath:
 
 ```ts
 import {
+  FlowLines,
   useTextFlow,
   flowText,
   carveLineSlots,
@@ -261,6 +262,7 @@ For obstacle-aware layouts, use segmented preparation from the stable API and th
 ```tsx
 import { PText, createPretextTypography, usePreparedSegments } from '@santjc/react-pretext'
 import {
+  FlowLines,
   createLineSlotResolver,
   getCircleBlockedLineRangeForRow,
   useTextFlow,
@@ -336,24 +338,22 @@ function EditorialExample({ width }: { width: number }) {
         }}
       />
 
-      {flow.lines.map((line, index) => (
-        <div
-          key={`${line.start.segmentIndex}-${line.start.graphemeIndex}-${index}`}
-          style={{
-            position: 'absolute',
-            left: line.x,
-            top: line.y,
-            width: Math.ceil(line.width),
-            ...body.style,
-          }}
-        >
-          {line.text}
-        </div>
-      ))}
+      <FlowLines
+        lines={flow.lines}
+        font={body.font}
+        lineHeight={body.lineHeight}
+        renderLine={({ key, line, text, style }) => (
+          <p key={key} data-line-start={line.start.graphemeIndex} style={style}>
+            <span style={{ color: '#ff4d00' }}>§</span> {text}
+          </p>
+        )}
+      />
     </div>
   )
 }
 ```
+
+`FlowLines` is the small advanced bridge for direct `useTextFlow` usage: it keeps the absolute-positioned line shell in one place while letting you replace the rendered element, semantics, annotations, or styling with `renderLine`.
 
 ## How to think about the API
 
