@@ -38,6 +38,7 @@ import {
   layoutNextLine,
   walkLineRanges,
   useElementWidth,
+  useMeasuredText,
   usePreparedText,
   usePreparedSegments,
   usePretextLayout,
@@ -50,6 +51,7 @@ import {
 
 - `prepare`, `prepareWithSegments`, `layout`, `layoutWithLines`, `layoutNextLine`, `walkLineRanges`
 - `useElementWidth`
+- `useMeasuredText`
 - `usePreparedText`
 - `usePreparedSegments`
 - `usePretextLayout`
@@ -99,32 +101,33 @@ That is the purpose of `@santjc/react-pretext`.
 
 ## Examples
 
-### Measure text with prepared text and layout
+### Measure text with one hook
 
 ```tsx
-import { usePreparedText, usePretextLayout } from '@santjc/react-pretext'
+import { createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 
 function Example() {
   const text = 'Prepare once, layout often.'
-  const font = '400 18px GeistVariable, sans-serif'
-
-  const { prepared } = usePreparedText({ text, font })
-  const { height, lineCount } = usePretextLayout({
-    prepared,
-    width: 320,
+  const typography = createPretextTypography({
+    font: '400 18px GeistVariable, sans-serif',
     lineHeight: 28,
+    width: 320,
   })
+
+  const { height, lineCount } = useMeasuredText({ text, typography })
 
   return <div>{height}px / {lineCount} lines</div>
 }
 ```
 
+Use the lower-level hooks when you want to prepare once and reuse that prepared handle across multiple layouts yourself.
+
 Enable profiling only when you need the timing metric:
 
 ```tsx
-const { prepareMs } = usePreparedText({
+const { prepareMs } = useMeasuredText({
   text,
-  font,
+  typography,
   enableProfiling: true,
 })
 ```
@@ -181,7 +184,7 @@ function Example() {
 Use `createPretextTypography()` when the same values should drive both measurement and rendering.
 
 ```tsx
-import { PText, createPretextTypography, usePreparedText, usePretextLayout } from '@santjc/react-pretext'
+import { PText, createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 
 function Example({ text }: { text: string }) {
   const typography = createPretextTypography({
@@ -190,17 +193,15 @@ function Example({ text }: { text: string }) {
     width: 360,
   })
 
-  const { prepared } = usePreparedText({ text, font: typography.font })
-  const layout = usePretextLayout({
-    prepared,
-    width: typography.width ?? 360,
-    lineHeight: typography.lineHeight,
-  })
+  const layout = useMeasuredText({ text, typography })
 
   return (
-    <PText typography={typography}>
+    <>
+      <div>{layout.height}px</div>
+      <PText typography={typography}>
       {text}
-    </PText>
+      </PText>
+    </>
   )
 }
 ```

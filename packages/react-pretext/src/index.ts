@@ -1,6 +1,7 @@
 export * from '@chenglou/pretext'
 
 export { useElementWidth } from './hooks/useElementWidth'
+export { useMeasuredText } from './hooks/useMeasuredText'
 export { usePreparedText } from './hooks/usePreparedText'
 export { usePreparedSegments } from './hooks/usePreparedSegments'
 export { usePretextLayout } from './hooks/usePretextLayout'
@@ -9,6 +10,7 @@ export { createPretextTypography } from './lib/typography'
 export { PText } from './components/PText'
 
 export type { ElementWidthResult } from './hooks/useElementWidth'
+export type { UseMeasuredTextInput, UseMeasuredTextResult } from './hooks/useMeasuredText'
 export type { PrepareOptions, UsePreparedTextInput, UsePreparedTextResult } from './hooks/usePreparedText'
 export type { UsePreparedSegmentsInput, UsePreparedSegmentsResult } from './hooks/usePreparedSegments'
 export type { UsePretextLayoutInput, UsePretextLayoutResult } from './hooks/usePretextLayout'

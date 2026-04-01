@@ -20,6 +20,7 @@ The root package exports two things:
 Stable React exports:
 
 - `useElementWidth`
+- `useMeasuredText`
 - `usePreparedText`
 - `usePreparedSegments`
 - `usePretextLayout`
@@ -64,31 +65,32 @@ Reach for them when you need custom line rendering, obstacle-aware flow, or mult
 
 ## Examples
 
-### Measure text with prepared text + layout
+### Measure text with one hook
 
 ```tsx
-import { usePreparedText, usePretextLayout } from '@santjc/react-pretext'
+import { createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 
 function Example() {
   const text = 'Prepare once, layout often.'
-  const font = "400 18px Geist"
-  const { prepared } = usePreparedText({ text, font })
-  const { height, lineCount } = usePretextLayout({
-    prepared,
-    width: 320,
+  const typography = createPretextTypography({
+    font: '400 18px Geist',
     lineHeight: 28,
+    width: 320,
   })
+  const { height, lineCount } = useMeasuredText({ text, typography })
 
   return <div>{height}px / {lineCount} lines</div>
 }
 ```
 
+Drop down to `usePreparedText` and `usePretextLayout` when you want to control the prepare and layout phases separately.
+
 Enable profiling only when you need the timing metric:
 
 ```tsx
-const { prepareMs } = usePreparedText({
+const { prepareMs } = useMeasuredText({
   text,
-  font,
+  typography,
   enableProfiling: true,
 })
 ```

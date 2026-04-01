@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PText, createPretextTypography, usePreparedText, usePretextLayout } from '@santjc/react-pretext'
+import { PText, createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 import { buildPlaygroundFont, fontWeightOptions } from '../lib/typography'
 
@@ -17,11 +17,10 @@ function MeasurePage() {
     width,
   })
 
-  const { prepared, prepareMs } = usePreparedText({ text, font: typography.font, enableProfiling: true })
-  const layout = usePretextLayout({
-    prepared,
-    width: typography.width ?? width,
-    lineHeight: typography.lineHeight,
+  const layout = useMeasuredText({
+    text,
+    typography,
+    enableProfiling: true,
   })
 
   return (
@@ -65,7 +64,7 @@ function MeasurePage() {
 
         <section className="panel display-panel">
           <div className="metrics-inline">
-            <div className="metric-box"><span>Prepare</span><strong>{prepareMs?.toFixed(3) ?? 'off'}</strong></div>
+            <div className="metric-box"><span>Prepare</span><strong>{layout.prepareMs?.toFixed(3) ?? 'off'}</strong></div>
             <div className="metric-box"><span>Lines</span><strong>{layout.lineCount}</strong></div>
             <div className="metric-box"><span>Height</span><strong>{layout.height}px</strong></div>
           </div>

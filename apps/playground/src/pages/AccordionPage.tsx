@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { PText, createPretextTypography, prepare, usePretextLayout } from '@santjc/react-pretext'
+import { useState } from 'react'
+import { PText, createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 import { buildPlaygroundFont } from '../lib/typography'
 
@@ -43,8 +43,7 @@ function AccordionSection({
 }) {
   const bodyWidth = Math.max(0, width - 48)
   const typography = createPretextTypography({ font, lineHeight, width: bodyWidth })
-  const prepared = useMemo(() => prepare(body, typography.font), [body, typography.font])
-  const metrics = usePretextLayout({ prepared, width: typography.width ?? bodyWidth, lineHeight: typography.lineHeight })
+  const metrics = useMeasuredText({ text: body, typography })
   const contentHeight = metrics.height
 
   return (
