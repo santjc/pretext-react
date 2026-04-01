@@ -1,16 +1,16 @@
 import { render } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { EditorialSurface } from './PEditorialSurface'
+import { EditorialSurface } from './EditorialSurface'
 
 const useElementWidthMock = vi.fn()
 const usePreparedSegmentsMock = vi.fn()
 const layoutEditorialTrackMock = vi.fn()
 
-vi.mock('../hooks/useElementWidth', () => ({
+vi.mock('../../core/hooks/useElementWidth', () => ({
   useElementWidth: (...args: unknown[]) => useElementWidthMock(...args),
 }))
 
-vi.mock('../hooks/usePreparedSegments', () => ({
+vi.mock('../../core/hooks/usePreparedSegments', () => ({
   usePreparedSegments: (...args: unknown[]) => usePreparedSegmentsMock(...args),
 }))
 

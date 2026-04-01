@@ -173,6 +173,16 @@ Reach for them when you need custom line rendering, obstacle-aware flow, or mult
 
 `FlowLines` is the intended bridge for direct `useTextFlow` consumers: it provides the default absolute-positioned line shell and a `renderLine` escape hatch for semantics, annotations, and custom styling.
 
+## Source layout
+
+The repository keeps package boundaries visible in the source tree:
+
+- `src/core/*` backs the root package exports
+- `src/editorial/*` backs `@santjc/react-pretext/editorial`
+- `src/test/*` holds cross-entrypoint package tests
+
+Playground helpers stay in `apps/playground/src/lib/*` unless they are intentionally promoted into the package with matching tests and docs.
+
 ## Caveats
 
 - `createPretextTypography()` is the recommended way to keep measurement inputs and render styles aligned.

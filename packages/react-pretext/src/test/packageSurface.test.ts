@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import * as editorial from './editorial'
-import * as root from './index'
-import * as pretext from './pretext'
+import * as editorial from '../editorial'
+import * as root from '../index'
+import * as pretext from '../pretext'
 
 describe('package surface', () => {
   it('keeps editorial exports off the root entrypoint', () => {
@@ -59,5 +59,14 @@ describe('package surface', () => {
       import: './dist/editorial.js',
       types: './dist/editorial.d.ts',
     })
+  })
+
+  it('keeps source-layer boundaries visible in the entrypoints', () => {
+    const rootEntrypoint = readFileSync('src/index.ts', 'utf8')
+    const editorialEntrypoint = readFileSync('src/editorial.ts', 'utf8')
+
+    expect(rootEntrypoint).toContain("./core/")
+    expect(rootEntrypoint).not.toContain("./editorial/")
+    expect(editorialEntrypoint).toContain("./editorial/")
   })
 })

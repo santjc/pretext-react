@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { MockResizeObserver } from '../../test/setup'
 import { useElementWidth } from './useElementWidth'
-import { MockResizeObserver } from '../test/setup'
 
 describe('useElementWidth', () => {
   it('tracks width updates from ResizeObserver', () => {

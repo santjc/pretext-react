@@ -378,6 +378,16 @@ If you are building custom layout systems, the editorial APIs on the `editorial`
 
 If you want the original non-React low-level helpers, use the `pretext` subpath.
 
+## Source layout
+
+The package source tree mirrors the public layering decisions:
+
+- `packages/react-pretext/src/core/*` contains the default adoption path and root exports
+- `packages/react-pretext/src/editorial/*` contains the advanced editorial subpath
+- `packages/react-pretext/src/test/*` contains cross-entrypoint package tests
+
+Keep playground-only helpers in `apps/playground/src/lib/*` unless they are being intentionally promoted into the public package with tests and docs.
+
 ## Caveats
 
 - `createPretextTypography()` is the recommended way to keep measurement inputs and render styles aligned.
@@ -410,3 +420,4 @@ Good contributions for this project usually look like one of these:
 - validating whether a helper belongs in the root public API or should stay internal
 
 When contributing, prefer small, explicit abstractions over large convenience layers. The package is intentionally trying to stay close to `pretext`.
+Keep `src/core` independent from `src/editorial`, and treat repeated playground wiring as a signal to either formalize an API or keep it clearly local.
