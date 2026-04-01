@@ -5,7 +5,7 @@ import {
   PEditorialFigure,
   PEditorialSurface,
   PEditorialTrack,
-} from "@santjc/react-pretext";
+} from "@santjc/react-pretext/editorial";
 import { ShowcaseIntro } from "../components/ShowcaseIntro";
 import { fontWeightOptions } from "../lib/typography";
 
@@ -71,7 +71,7 @@ function EditorialPage() {
           eyebrow="Editorial"
           title="Editorial newspaper lab"
           description="A newspaper-structured showcase tuned to the site aesthetic: responsive PText headlines, single-surface wraparound text, multi-track cursor handoff, and pretext-driven justify spacing with proportionally related columns."
-          status="Public API"
+          status="Advanced subpath"
         />
 
       <section className="panel controls-inline-panel controls-inline-panel-wide controls-inline-panel-editorial">

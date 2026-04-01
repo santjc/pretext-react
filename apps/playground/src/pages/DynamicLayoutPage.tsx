@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { PText, createLineSlotResolver, getCircleBlockedLineRangeForRow, usePreparedSegments, useTextFlow } from '@santjc/react-pretext'
+import { PText, usePreparedSegments } from '@santjc/react-pretext'
+import { createLineSlotResolver, getCircleBlockedLineRangeForRow, useTextFlow } from '@santjc/react-pretext/editorial'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 
 const dynamicTitle = 'Dynamic layouts can reroute headlines and body copy around fixed obstacles without asking the browser for text measurements.'
@@ -100,7 +101,7 @@ function DynamicLayoutPage() {
         eyebrow="Dynamic Layout"
         title="Fixed-height spread with routed text"
         description="Headline and body copy both route around explicit geometry inside a bounded editorial stage. Resize it and the line path changes immediately."
-        status="Stable API"
+        status="Advanced subpath"
       />
 
       <section className="showcase-grid">

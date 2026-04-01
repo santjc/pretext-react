@@ -28,18 +28,21 @@ Stable React exports:
 
 ## Editorial API
 
-Editorial helpers are exported from the package root:
+Editorial helpers live on the advanced `editorial` subpath:
 
 ```ts
 import {
   useTextFlow,
   flowText,
   carveLineSlots,
+  createLineSlotResolver,
+  getCircleBlockedLineRangeForRow,
+  pickWidestLineSlot,
   PEditorialColumns,
   PEditorialSurface,
   PEditorialTrack,
   PEditorialFigure,
-} from '@santjc/react-pretext'
+} from '@santjc/react-pretext/editorial'
 ```
 
 Current editorial exports:
@@ -55,7 +58,7 @@ Current editorial exports:
 - `PEditorialTrack`
 - `PEditorialFigure`
 
-These APIs are public and tested.
+These APIs are public and tested, but they are not part of the default root adoption path.
 
 Reach for them when you need custom line rendering, obstacle-aware flow, or multi-column continuation.
 
@@ -139,7 +142,8 @@ function Example() {
 ### Editorial text flow
 
 ```tsx
-import { usePreparedSegments, createLineSlotResolver, useTextFlow } from '@santjc/react-pretext'
+import { usePreparedSegments } from '@santjc/react-pretext'
+import { createLineSlotResolver, useTextFlow } from '@santjc/react-pretext/editorial'
 
 function Example() {
   const { prepared } = usePreparedSegments({
@@ -180,4 +184,4 @@ function Example() {
 - Editorial `lineRenderMode="justify"` uses pretext-derived `word-spacing` and will skip justification for unsupported whitespace patterns instead of delegating wrapping back to the browser.
 - `PEditorialFigure` treats explicit `x` and `y` as overrides over `placement`, and clamps the result within available bounds.
 
-The package exposes a single public root API surface.
+The package exposes a small root API plus an advanced editorial subpath.

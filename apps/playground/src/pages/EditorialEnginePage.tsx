@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { PEditorialColumns, PEditorialFigure, PEditorialTrack, PText } from '@santjc/react-pretext'
+import { PText } from '@santjc/react-pretext'
+import { PEditorialColumns, PEditorialFigure, PEditorialTrack } from '@santjc/react-pretext/editorial'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 
 const engineText = `The editorial engine demo is where the package starts to feel less like a measurement helper and more like a composition tool. Each track owns explicit width, padding, and obstruction rules, but the text cursor continues across the whole spread.
@@ -42,7 +43,7 @@ function EditorialEnginePage() {
         eyebrow="Editorial Engine"
         title="Animated geometry with multi-column continuation"
         description="Moving orbs, fixed pull quotes, and a shared text cursor across multiple tracks. The line layout updates from explicit geometry instead of DOM reads."
-        status="Stable API"
+        status="Advanced subpath"
       />
 
       <section className="controls-inline-panel controls-inline-panel-wide panel">

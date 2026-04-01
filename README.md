@@ -16,7 +16,7 @@ The package does not try to hide `pretext` behind a large framework. Instead, it
 - Thin React hooks over `prepare`, `prepareWithSegments`, `layout`, and `layoutWithLines`
 - `PText` component for semantic DOM text with measurement support
 - Width observation with `ResizeObserver`
-- Public editorial text-flow helpers for obstacle-aware layouts
+- Advanced editorial text-flow helpers on a dedicated subpath
 - Works well as a foundation for measurement-heavy UIs, article layouts, and custom editorial composition
 
 ## Installation
@@ -58,7 +58,7 @@ import {
 
 ## Editorial API
 
-Editorial APIs are available directly from the package root:
+Editorial APIs are available from the advanced `editorial` subpath:
 
 ```ts
 import {
@@ -72,10 +72,10 @@ import {
   PEditorialSurface,
   PEditorialTrack,
   PEditorialFigure,
-} from '@santjc/react-pretext'
+} from '@santjc/react-pretext/editorial'
 ```
 
-These APIs are public and supported from the package root.
+These APIs are public and supported, but they are intentionally separate from the root adoption path.
 
 Use them when you need:
 
@@ -93,7 +93,7 @@ What React applications still need is a thin layer that makes those primitives p
 - width observation
 - memoized preparation
 - semantic DOM integration
-- line-by-line composition helpers when layout becomes custom
+- line-by-line composition helpers when layout becomes custom enough to opt into the editorial layer
 
 That is the purpose of `@santjc/react-pretext`.
 
@@ -197,7 +197,7 @@ function Example({ value }: { value: string }) {
 
 ## Editorial layout example
 
-For obstacle-aware layouts, use segmented preparation from the stable API and the editorial helpers from the package root.
+For obstacle-aware layouts, use segmented preparation from the stable API and the editorial helpers from the `editorial` subpath.
 
 ```tsx
 import { PText, usePreparedSegments } from '@santjc/react-pretext'
@@ -205,7 +205,7 @@ import {
   createLineSlotResolver,
   getCircleBlockedLineRangeForRow,
   useTextFlow,
-} from '@santjc/react-pretext'
+} from '@santjc/react-pretext/editorial'
 
 function EditorialExample({ width }: { width: number }) {
   const lineHeight = 30
