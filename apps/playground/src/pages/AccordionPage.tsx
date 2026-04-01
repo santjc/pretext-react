@@ -84,8 +84,8 @@ function AccordionPage() {
     <main className="page showcase-page">
       <ShowcaseIntro
         eyebrow="Accordion"
-        title="Accordions with known text height"
-        description="Expand and collapse sections whose open heights come from Pretext instead of DOM measurement or hidden probe nodes."
+        title="Replace hidden measurement and scrollHeight"
+        description="This is the migration-style example: keep a normal accordion, but swap out hidden measuring nodes and scrollHeight reads for a predicted text height that is known before the panel opens."
         status="Stable API"
       />
 
@@ -104,8 +104,8 @@ function AccordionPage() {
             <input type="range" min="20" max="38" value={lineHeight} onChange={(event) => setLineHeight(Number(event.target.value))} />
           </label>
           <div className="note-card">
-            <p className="eyebrow eyebrow-muted">Why it matters</p>
-            <p className="page-copy">The open panel height is predictable before the section animates, so the resize path stays in JavaScript text layout instead of DOM reads.</p>
+            <p className="eyebrow eyebrow-muted">Migration path</p>
+            <p className="page-copy">Replace the usual hidden body clone or <code>scrollHeight</code> read with <code>useMeasuredText()</code>. The open height becomes data you can animate toward before layout is queried.</p>
           </div>
         </aside>
 

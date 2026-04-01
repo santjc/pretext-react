@@ -1,87 +1,99 @@
 import { PText, createPretextTypography } from '@santjc/react-pretext'
+import { useState } from 'react'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 import { buildPlaygroundFont } from '../lib/typography'
 
 function PTextPage() {
+  const [responsiveWidth, setResponsiveWidth] = useState(420)
   const headlineTypography = createPretextTypography({
-    font: buildPlaygroundFont(600, 40),
-    lineHeight: 42,
-    width: 720,
+    font: buildPlaygroundFont(600, 34),
+    lineHeight: 38,
+    width: 460,
   })
   const bodyTypography = createPretextTypography({
     font: buildPlaygroundFont(400, 18),
     lineHeight: 30,
-    width: 760,
+    width: 420,
   })
-  const subheadingTypography = createPretextTypography({
-    font: buildPlaygroundFont(600, 28),
+  const responsiveTypography = createPretextTypography({
+    font: buildPlaygroundFont(400, 18),
     lineHeight: 30,
-    width: 620,
   })
 
   return (
     <main className="page showcase-page">
       <ShowcaseIntro
         eyebrow="PText"
-        title="PText semantic wrapper"
-        description="A small DOM component that keeps real tags like h1 and p while delegating text measurement to pretext."
+        title="Semantic text with fixed or observed width"
+        description="PText keeps the rendered DOM simple while using the same measurement inputs underneath. Use explicit width when you already know it, or omit width and let the component observe its responsive container."
         status="Stable"
       />
 
-      <section className="panel semantic-panel">
-        <p className="eyebrow eyebrow-muted">Semantic output</p>
-        <div className="semantic-stack">
-          <div className="semantic-row semantic-row-active">
-            <p className="semantic-tag">{'<h1>'}</p>
-            <PText
-              as="h1"
-              typography={headlineTypography}
-              style={{ width: 'min(100%, 720px)' }}
-            >
-              Headlines preserve semantics
-            </PText>
+      <section className="compare-grid">
+        <article className="panel compare-column compare-column-soft">
+          <div className="example-head">
+            <div>
+              <p className="eyebrow eyebrow-muted">Fixed width</p>
+              <h3 className="example-title">Use one typography object for measured render output</h3>
+            </div>
+            <span className="status-tag status-tag-muted">core</span>
           </div>
 
-          <div className="semantic-row">
-            <p className="semantic-tag">{'<p>'}</p>
-            <PText
-              as="p"
-              typography={bodyTypography}
-              style={{ width: 'min(100%, 760px)' }}
-            >
-              Body text flows naturally while pretext handles measurement behind the scenes. The DOM stays simple and the
-              tag remains the real semantic element.
-            </PText>
-          </div>
+          <PText as="h1" typography={headlineTypography} style={{ margin: 0 }}>
+            Headlines preserve semantics without separate render wiring
+          </PText>
 
-          <div className="semantic-row">
-            <p className="semantic-tag">{'<h2>'}</p>
-            <PText
-              as="h2"
-              typography={subheadingTypography}
-              style={{ width: 'min(100%, 620px)' }}
-            >
-              Subheadings work too
-            </PText>
-          </div>
-        </div>
-      </section>
+          <PText as="p" typography={bodyTypography} className="preview-copy">
+            The same typography object supplies the measured font, line height, and fixed width. You do not need to repeat those values in style just to keep rendering aligned with measurement.
+          </PText>
 
-      <section className="panel code-panel">
-        <p className="eyebrow eyebrow-muted">Usage</p>
-        <pre className="code-block">{`const heading = createPretextTypography({
-  font: '600 40px GeistVariable, sans-serif',
-  lineHeight: 42,
-  width: 720,
+          <pre className="code-block">{`const body = createPretextTypography({
+  font: '400 18px GeistVariable, sans-serif',
+  lineHeight: 30,
+  width: 420,
 })
 
-<PText as="h1" typography={heading}>
-  Headlines preserve semantics
-</PText>
-
 <PText as="p" typography={body}>
-  Body text flows naturally...
+  Semantic text with shared typography.
 </PText>`}</pre>
+        </article>
+
+        <article className="panel compare-column compare-column-accent">
+          <div className="example-head">
+            <div>
+              <p className="eyebrow">Responsive width</p>
+              <h3 className="example-title">Let PText observe the container when width is not known ahead of time</h3>
+            </div>
+            <span className="status-tag">observed</span>
+          </div>
+
+          <label className="field field-progress-capped">
+            <span>Container width: {responsiveWidth}px</span>
+            <input type="range" min="260" max="515" value={responsiveWidth} onChange={(event) => setResponsiveWidth(Number(event.target.value))} />
+          </label>
+
+          <div className="preview-lane preview-lane-fluid" style={{ maxWidth: `${responsiveWidth}px` }}>
+            <PText as="p" typography={responsiveTypography} className="preview-copy">
+              This paragraph does not receive an explicit width prop. PText observes the rendered element width with ResizeObserver, then reuses the same typography values for measurement and DOM output.
+            </PText>
+          </div>
+
+          <div className="note-card">
+            <p className="eyebrow eyebrow-muted">Why this matters</p>
+            <p className="page-copy">Responsive components often know their font before they know their final width. This path avoids hand-written measurement plumbing for the common case.</p>
+          </div>
+
+          <pre className="code-block">{`const body = createPretextTypography({
+  font: '400 18px GeistVariable, sans-serif',
+  lineHeight: 30,
+})
+
+<div style={{ width: responsiveWidth }}>
+  <PText as="p" typography={body}>
+    Width is observed from the element.
+  </PText>
+</div>`}</pre>
+        </article>
       </section>
     </main>
   )

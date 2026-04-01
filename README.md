@@ -2,22 +2,25 @@
 
 Thin React primitives and re-exports for [`@chenglou/pretext`](https://www.npmjs.com/package/@chenglou/pretext).
 
-`@santjc/react-pretext` is designed to keep the original `pretext` mental model intact:
+`@santjc/react-pretext` is meant to make normal React adoption clearer, not to hide `pretext` behind a large framework.
 
-- prepare text once
-- lay it out many times
-- use richer line-level primitives when composition gets more advanced
+The default story is:
 
-The package does not try to hide `pretext` behind a large framework. Instead, it gives you a small React layer where React actually helps: width observation, memoized preparation, semantic DOM components, and composition helpers when layout gets more advanced.
+- define typography once
+- measure text with one hook
+- render semantic DOM with `PText`
+- use predicted heights in ordinary UI like accordions, cards, lists, and previews
+- reach for editorial flow only when block measurement is no longer enough
 
 ## Features
 
 - Re-exports the core `pretext` API
-- Thin React hooks over `prepare`, `prepareWithSegments`, `layout`, and `layoutWithLines`
-- `PText` component for semantic DOM text with measurement support
-- Width observation with `ResizeObserver`
-- Advanced editorial text-flow helpers on a dedicated subpath
-- Works well as a foundation for measurement-heavy UIs, article layouts, and custom editorial composition
+- `createPretextTypography()` for shared measurement and render config
+- `useMeasuredText()` for the simplest height and line-count cases
+- `PText` for semantic DOM text with measurement support
+- Width observation with `ResizeObserver` when `PText` does not receive an explicit `width`
+- Lower-level hooks for prepared text, segmented text, and line access
+- Advanced editorial helpers on a dedicated `editorial` subpath
 
 ## Installation
 
@@ -37,6 +40,7 @@ import {
   layoutWithLines,
   layoutNextLine,
   walkLineRanges,
+  createPretextTypography,
   useElementWidth,
   useMeasuredText,
   usePreparedText,
@@ -47,9 +51,9 @@ import {
 } from '@santjc/react-pretext'
 ```
 
-### Stable exports
+Stable React exports:
 
-- `prepare`, `prepareWithSegments`, `layout`, `layoutWithLines`, `layoutNextLine`, `walkLineRanges`
+- `createPretextTypography`
 - `useElementWidth`
 - `useMeasuredText`
 - `usePreparedText`
@@ -58,56 +62,14 @@ import {
 - `usePretextLines`
 - `PText`
 
-## Editorial API
+## Start Here
 
-Editorial APIs are available from the advanced `editorial` subpath:
-
-```ts
-import {
-  useTextFlow,
-  flowText,
-  carveLineSlots,
-  createLineSlotResolver,
-  getCircleBlockedLineRangeForRow,
-  pickWidestLineSlot,
-  PEditorialColumns,
-  PEditorialSurface,
-  PEditorialTrack,
-  PEditorialFigure,
-} from '@santjc/react-pretext/editorial'
-```
-
-These APIs are public and supported, but they are intentionally separate from the root adoption path.
-
-Use them when you need:
-
-- custom line-by-line rendering
-- obstacle-aware text flow
-- multi-column continuation with cursor handoff
-- editorial or newspaper-style composition
-
-## Why this package exists
-
-`pretext` already solves the hard text problem: measuring and laying out text without relying on DOM layout reads.
-
-What React applications still need is a thin layer that makes those primitives pleasant to use inside components:
-
-- width observation
-- memoized preparation
-- semantic DOM integration
-- line-by-line composition helpers when layout becomes custom enough to opt into the editorial layer
-
-That is the purpose of `@santjc/react-pretext`.
-
-## Examples
-
-### Measure text with one hook
+### 1. Measure text with one hook
 
 ```tsx
 import { createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
 
-function Example() {
-  const text = 'Prepare once, layout often.'
+function Example({ text }: { text: string }) {
   const typography = createPretextTypography({
     font: '400 18px GeistVariable, sans-serif',
     lineHeight: 28,
@@ -120,7 +82,7 @@ function Example() {
 }
 ```
 
-Use the lower-level hooks when you want to prepare once and reuse that prepared handle across multiple layouts yourself.
+Use this for the common case where a component needs a known text height, line count, or both.
 
 Enable profiling only when you need the timing metric:
 
@@ -132,7 +94,105 @@ const { prepareMs } = useMeasuredText({
 })
 ```
 
-### Get actual lines from segmented text
+### 2. Use shared typography with `PText`
+
+```tsx
+import { PText, createPretextTypography } from '@santjc/react-pretext'
+
+function Example() {
+  const body = createPretextTypography({
+    font: '400 18px GeistVariable, sans-serif',
+    lineHeight: 28,
+    width: 320,
+  })
+
+  return (
+    <PText as="p" typography={body}>
+      Semantic text with one source of truth for measurement and render output.
+    </PText>
+  )
+}
+```
+
+`PText` applies `font`, `lineHeight`, and explicit `width` from its measurement inputs by default. If you pass `style.font` or `style.width`, those render overrides still win.
+
+### 3. Let `PText` observe responsive width
+
+```tsx
+import { PText, createPretextTypography } from '@santjc/react-pretext'
+
+function Example() {
+  const body = createPretextTypography({
+    font: '400 18px GeistVariable, sans-serif',
+    lineHeight: 28,
+  })
+
+  return (
+    <div style={{ width: 'min(100%, 36rem)' }}>
+      <PText as="p" typography={body}>
+        This paragraph does not receive an explicit width. PText observes the element width and remeasures as the container changes.
+      </PText>
+    </div>
+  )
+}
+```
+
+This is the intended happy path when the font is known but the final width comes from responsive layout.
+
+### 4. Replace hidden measurement or `scrollHeight`
+
+```tsx
+import { createPretextTypography, useMeasuredText, PText } from '@santjc/react-pretext'
+
+function AccordionBody({ isOpen, text }: { isOpen: boolean; text: string }) {
+  const typography = createPretextTypography({
+    font: '400 18px GeistVariable, sans-serif',
+    lineHeight: 28,
+    width: 360,
+  })
+  const { height } = useMeasuredText({ text, typography })
+
+  return (
+    <div style={{ height: isOpen ? `${height}px` : '0px', overflow: 'hidden' }}>
+      <PText as="p" typography={typography}>
+        {text}
+      </PText>
+    </div>
+  )
+}
+```
+
+This keeps the DOM semantic while removing hidden probe nodes or animation logic that depends on reading `scrollHeight` after render.
+
+### 5. Predict measured card or list heights
+
+```tsx
+import { createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
+
+function ResultCard({ text, width }: { text: string; width: number }) {
+  const typography = createPretextTypography({
+    font: '400 16px GeistVariable, sans-serif',
+    lineHeight: 26,
+    width: width - 32,
+  })
+  const { height, lineCount } = useMeasuredText({ text, typography })
+
+  return (
+    <div>
+      <div>{lineCount} lines</div>
+      <div>predicted body height: {height}px</div>
+    </div>
+  )
+}
+```
+
+This pattern works well for feeds, search results, CMS previews, issue lists, and any responsive grid where text height affects placement.
+
+### 6. Drop lower only when you need more control
+
+If you want to prepare once and reuse that prepared handle across multiple layouts yourself, drop down to `usePreparedText()` and `usePretextLayout()`.
+
+If you want actual line output from segmented text, use `usePreparedSegments()` with `usePretextLines()`.
 
 ```tsx
 import { usePreparedSegments, usePretextLines } from '@santjc/react-pretext'
@@ -159,76 +219,35 @@ function Example() {
 }
 ```
 
-### Use `PText`
+## Editorial API
 
-```tsx
-import { PText, createPretextTypography } from '@santjc/react-pretext'
+Editorial APIs are available from the advanced `editorial` subpath:
 
-function Example() {
-  const body = createPretextTypography({
-    font: '400 18px GeistVariable, sans-serif',
-    lineHeight: 28,
-    width: 320,
-  })
-
-  return (
-    <PText as="p" typography={body}>
-      Semantic text with a thin measurement wrapper.
-    </PText>
-  )
-}
+```ts
+import {
+  useTextFlow,
+  flowText,
+  carveLineSlots,
+  createLineSlotResolver,
+  getCircleBlockedLineRangeForRow,
+  pickWidestLineSlot,
+  PEditorialColumns,
+  PEditorialSurface,
+  PEditorialTrack,
+  PEditorialFigure,
+} from '@santjc/react-pretext/editorial'
 ```
 
-### Recommended typography workflow
+These APIs are public and supported, but they are intentionally separate from the default adoption path.
 
-Use `createPretextTypography()` when the same values should drive both measurement and rendering.
+Reach for them when you need:
 
-```tsx
-import { PText, createPretextTypography, useMeasuredText } from '@santjc/react-pretext'
+- custom line-by-line rendering
+- obstacle-aware text flow
+- multi-column continuation with cursor handoff
+- editorial or newspaper-style composition
 
-function Example({ text }: { text: string }) {
-  const typography = createPretextTypography({
-    font: '400 18px GeistVariable, sans-serif',
-    lineHeight: 28,
-    width: 360,
-  })
-
-  const layout = useMeasuredText({ text, typography })
-
-  return (
-    <>
-      <div>{layout.height}px</div>
-      <PText typography={typography}>
-      {text}
-      </PText>
-    </>
-  )
-}
-```
-
-`PText` now applies `font`, `lineHeight`, and explicit `width` from its measurement inputs by default. If you pass `style.font` or `style.width`, those render overrides still win.
-
-### Preserve textarea-style whitespace
-
-```tsx
-import { PText, createPretextTypography } from '@santjc/react-pretext'
-
-function Example({ value }: { value: string }) {
-  const body = createPretextTypography({
-    font: '400 16px GeistVariable, sans-serif',
-    lineHeight: 24,
-    width: 420,
-  })
-
-  return (
-    <PText as="p" typography={body} prepareOptions={{ whiteSpace: 'pre-wrap' }}>
-      {value}
-    </PText>
-  )
-}
-```
-
-## Editorial layout example
+### Advanced editorial example
 
 For obstacle-aware layouts, use segmented preparation from the stable API and the editorial helpers from the `editorial` subpath.
 
@@ -331,36 +350,24 @@ function EditorialExample({ width }: { width: number }) {
 
 ## How to think about the API
 
-The package works best if you treat it in layers:
+The package works best if you treat it in layers.
 
 ### Stable root layer
+
 - prepare text
 - layout text
 - observe width
 - render semantic DOM text
+- predict heights for ordinary UI
 
 ### Editorial layer
+
 - resolve available line slots
 - flow text around obstacles
 - assemble editorial or custom layouts
 
 If you are building normal UI text measurement, stay on the stable root API.
 If you are building custom layout systems, the editorial APIs on the `editorial` subpath are the right place to explore.
-
-## Current Scope
-
-What this package is good at today:
-
-- stable text preparation and measurement in React
-- semantic DOM rendering with `PText`
-- low-level line access for custom rendering
-- editorial surfaces and columns with figure obstacles and explicit justify spacing
-
-What it is not trying to be:
-
-- a general rich text editor
-- a DOM-based typography framework
-- a full publishing system
 
 ## Caveats
 
@@ -373,13 +380,6 @@ What it is not trying to be:
 - `usePreparedText` only includes `prepareMs` when `enableProfiling: true` is passed.
 - Editorial `lineRenderMode="justify"` uses explicit `word-spacing` derived from pretext line measurements instead of browser `text-align: justify`. Complex whitespace cases fall back to left alignment.
 - `PEditorialFigure` treats explicit `x` and `y` as overrides over `placement`, and clamps the final position within the available bounds.
-
-The current package surface is intentionally small and public:
-
-- stable measurement hooks and `PText`
-- public editorial primitives on the `editorial` subpath
-- explicit justify rendering based on pretext measurements
-- playground routes that exercise both measurement and editorial flow
 
 ## Contributing
 

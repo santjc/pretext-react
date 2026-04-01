@@ -68,7 +68,7 @@ function BubblesPage() {
             <div className="metric-box"><span>Saved</span><strong>{metrics.cssWidth - metrics.shrinkwrapWidth}px</strong></div>
           </div>
 
-          <div className="compare-grid">
+          <div className="compare-grid compare-grid-stacked">
             <article className="panel compare-column compare-column-soft">
               <div className="example-head">
                 <div>
@@ -79,7 +79,7 @@ function BubblesPage() {
                   <span className="status-tag status-tag-muted">waste {metrics.cssWaste}px</span>
                 </div>
               </div>
-              <div className="lane" style={{ width: `${containerWidth}px` }}>
+              <div className="lane lane-fluid" style={{ maxWidth: `${containerWidth}px` }}>
                 <PText
                   as="p"
                   typography={cssTypography}
@@ -100,7 +100,7 @@ function BubblesPage() {
                   <span className="status-tag">waste {metrics.shrinkwrapWaste}px</span>
                 </div>
               </div>
-              <div className="lane" style={{ width: `${containerWidth}px` }}>
+              <div className="lane lane-fluid" style={{ maxWidth: `${containerWidth}px` }}>
                 <PText
                   as="p"
                   typography={shrinkwrapTypography}

@@ -43,14 +43,23 @@ const masonryCards: MasonryCard[] = [
   },
 ] as const
 
+const MIN_COL_PX = 200
+
 function MasonryPage() {
-  const [containerWidth, setContainerWidth] = useState(980)
-  const [columnCount, setColumnCount] = useState(3)
+  const [containerWidth, setContainerWidth] = useState(720)
+  const [columnCount, setColumnCount] = useState(2)
   const [fontSize, setFontSize] = useState(16)
   const [lineHeight, setLineHeight] = useState(26)
   const gap = 18
   const cardChromeHeight = 112
-  const columnWidth = Math.floor((containerWidth - gap * (columnCount - 1)) / columnCount)
+
+  const maxColumnsForContainer = useMemo(
+    () => Math.max(1, Math.min(4, Math.floor((containerWidth + gap) / (MIN_COL_PX + gap)))),
+    [containerWidth, gap],
+  )
+
+  const effectiveColumnCount = Math.min(columnCount, maxColumnsForContainer)
+  const columnWidth = Math.floor((containerWidth - gap * (effectiveColumnCount - 1)) / effectiveColumnCount)
   const textWidth = Math.max(0, columnWidth - 36)
   const typography = createPretextTypography({
     font: buildPlaygroundFont(400, fontSize),
@@ -72,25 +81,38 @@ function MasonryPage() {
     [cardChromeHeight, textWidth, typography.font, typography.lineHeight],
   )
 
-  const packed = useMemo(() => packMasonryCards(predictedCards, columnCount, gap), [columnCount, gap, predictedCards])
+  const packed = useMemo(() => packMasonryCards(predictedCards, effectiveColumnCount, gap), [effectiveColumnCount, gap, predictedCards])
 
   return (
     <main className="page showcase-page">
       <ShowcaseIntro
-        eyebrow="Masonry"
-        title="Text-card packing without DOM reads"
-        description="Card heights are predicted from Pretext before placement, so the feed can pack itself without rendering every card just to learn its size."
+        eyebrow="Cards and lists"
+        title="Measured cards from responsive width"
+        description="This is the card-feed version of the same adoption story: observe or compute the available column width, predict text height from shared typography, and place cards before the browser has to answer size questions for every item."
         status="Stable primitives"
       />
 
       <section className="controls-inline-panel controls-inline-panel-wide panel">
         <label className="field">
           <span>Container width: {containerWidth}px</span>
-          <input type="range" min="640" max="1160" value={containerWidth} onChange={(event) => setContainerWidth(Number(event.target.value))} />
+          <input type="range" min="380" max="1000" value={containerWidth} onChange={(event) => setContainerWidth(Number(event.target.value))} />
         </label>
         <label className="field">
-          <span>Columns: {columnCount}</span>
-          <input type="range" min="2" max="4" step="1" value={columnCount} onChange={(event) => setColumnCount(Number(event.target.value))} />
+          <span>
+            Columns: {effectiveColumnCount}
+            {maxColumnsForContainer < 4 ? ` (max ${maxColumnsForContainer} at this width)` : ''}
+          </span>
+          <input
+            type="range"
+            min="1"
+            max={maxColumnsForContainer}
+            step="1"
+            value={effectiveColumnCount}
+            onChange={(event) => {
+              const next = Number(event.target.value)
+              setColumnCount(Math.min(next, maxColumnsForContainer))
+            }}
+          />
         </label>
         <label className="field">
           <span>Body size: {fontSize}px</span>
@@ -109,7 +131,14 @@ function MasonryPage() {
           <div className="metric-box"><span>Tallest column</span><strong>{Math.max(...packed.columnHeights.map((height) => Math.max(0, height - gap)))}px</strong></div>
         </div>
 
-        <div className="masonry-stage" style={{ width: `${containerWidth}px`, gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
+        <div
+          className="masonry-stage masonry-stage-capped"
+          style={{
+            width: '100%',
+            maxWidth: `${containerWidth}px`,
+            gridTemplateColumns: `repeat(${effectiveColumnCount}, minmax(0, 1fr))`,
+          }}
+        >
           {packed.columns.map((column, columnIndex) => (
             <div key={columnIndex} className="masonry-column" style={{ gap: `${gap}px` }}>
               {column.map((item) => (

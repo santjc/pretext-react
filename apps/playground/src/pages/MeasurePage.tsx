@@ -26,9 +26,9 @@ function MeasurePage() {
   return (
     <main className="page showcase-page">
       <ShowcaseIntro
-        eyebrow="Measurement"
-        title="Measurement primitives"
-        description="Direct React wrappers around prepare and layout, with width observation separate from text preparation."
+        eyebrow="Measure text"
+        title="Simple measured text with one hook"
+        description="This is the smallest normal adoption path: define one shared typography object, pass it to useMeasuredText, and use the returned height and line count in your component state or layout logic."
         status="Stable"
       />
 
@@ -60,6 +60,10 @@ function MeasurePage() {
               ))}
             </select>
           </label>
+          <div className="note-card">
+            <p className="eyebrow eyebrow-muted">Shared typography</p>
+            <p className="page-copy">The same <code>typography</code> object feeds both the measurement hook and the preview component, so width, font, and line height do not drift apart.</p>
+          </div>
         </aside>
 
         <section className="panel display-panel">
@@ -69,7 +73,7 @@ function MeasurePage() {
             <div className="metric-box"><span>Height</span><strong>{layout.height}px</strong></div>
           </div>
 
-          <div className="preview-lane" style={{ width: `${width}px` }}>
+          <div className="preview-lane preview-lane-fluid" style={{ maxWidth: `${width}px` }}>
             <PText
               as="p"
               typography={typography}
@@ -78,6 +82,14 @@ function MeasurePage() {
               {text}
             </PText>
           </div>
+
+          <pre className="code-block">{`const typography = createPretextTypography({
+  font: '400 20px GeistVariable, sans-serif',
+  lineHeight: 30,
+  width: 360,
+})
+
+const { height, lineCount } = useMeasuredText({ text, typography })`}</pre>
         </section>
       </section>
     </main>

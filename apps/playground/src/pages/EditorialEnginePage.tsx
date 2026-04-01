@@ -74,6 +74,11 @@ function EditorialEnginePage() {
         <div className="note-card">
           <p className="eyebrow eyebrow-muted">Why it matters</p>
           <p className="page-copy">The text cursor hands off from one track to the next, so the whole spread behaves like one continuous article with moving obstacles.</p>
+          <p className="page-copy editorial-engine-aside">
+            <strong className="engine-sidecard-kicker">Zero DOM reads</strong>
+            {' '}
+            Line placement does not use layout measurement on the DOM; every obstacle is explicit geometry.
+          </p>
         </div>
       </section>
 
@@ -116,14 +121,7 @@ function EditorialEnginePage() {
             </PEditorialFigure>
           </PEditorialTrack>
 
-          <PEditorialTrack fr={0.93} minHeight={420} paddingInline={14} className="editorial-engine-track">
-            <PEditorialFigure shape="rect" width={160} height={178} placement="top-center" linePadding={14}>
-              <div className="engine-sidecard">
-                <p className="engine-sidecard-kicker">Zero DOM reads</p>
-                <strong>All obstacle placement is explicit.</strong>
-              </div>
-            </PEditorialFigure>
-          </PEditorialTrack>
+          <PEditorialTrack fr={0.93} minHeight={420} paddingInline={14} className="editorial-engine-track" />
         </PEditorialColumns>
       </section>
     </main>

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { PText, createPretextTypography, usePreparedSegments } from '@santjc/react-pretext'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePreparedSegments } from '@santjc/react-pretext'
 import { createLineSlotResolver, getCircleBlockedLineRangeForRow, useTextFlow } from '@santjc/react-pretext/editorial'
 import { ShowcaseIntro } from '../components/ShowcaseIntro'
 
@@ -15,34 +15,49 @@ function DynamicLayoutPage() {
   const [width, setWidth] = useState(900)
   const [height, setHeight] = useState(520)
   const [lineHeight, setLineHeight] = useState(26)
+  const [maxStageWidth, setMaxStageWidth] = useState(1080)
+  const stageWrapRef = useRef<HTMLDivElement>(null)
   const titleFont = '700 34px GeistVariable, sans-serif'
   const bodyFont = '400 16px GeistVariable, sans-serif'
-  const captionTypography = createPretextTypography({
-    font: '500 13px GeistVariable, sans-serif',
-    lineHeight: 18,
-    width: 220,
-  })
+
+  useEffect(() => {
+    const el = stageWrapRef.current
+    if (!el) {
+      return
+    }
+    const measure = () => {
+      setMaxStageWidth(Math.max(320, Math.floor(el.clientWidth)))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const layoutWidth = Math.min(width, maxStageWidth)
+  const stageSliderMax = Math.max(320, maxStageWidth)
+  const stageSliderMin = Math.min(620, stageSliderMax)
 
   const titlePrepared = usePreparedSegments({ text: dynamicTitle, font: titleFont })
   const bodyPrepared = usePreparedSegments({ text: dynamicBody, font: bodyFont, options: { whiteSpace: 'pre-wrap' } })
 
   const obstacleA = useMemo(
-    () => ({ x: Math.round(width * 0.11), y: 38, radius: 58 }),
-    [width],
+    () => ({ x: Math.round(layoutWidth * 0.11), y: 38, radius: 58 }),
+    [layoutWidth],
   )
   const obstacleB = useMemo(
-    () => ({ x: Math.round(width * 0.76), y: 66, radius: 82 }),
-    [width],
+    () => ({ x: Math.round(layoutWidth * 0.76), y: 66, radius: 82 }),
+    [layoutWidth],
   )
   const obstacleC = useMemo(
-    () => ({ x: Math.round(width * 0.66), y: 268, radius: 72 }),
-    [width],
+    () => ({ x: Math.round(layoutWidth * 0.66), y: 268, radius: 72 }),
+    [layoutWidth],
   )
 
   const titleSlotResolver = useMemo(
     () =>
       createLineSlotResolver({
-        baseLineSlot: { left: 28, right: width - 28 },
+        baseLineSlot: { left: 28, right: layoutWidth - 28 },
         lineHeight: 42,
         minWidth: 240,
         getBlockedLineRanges: (lineTop, lineBottom) =>
@@ -59,13 +74,13 @@ function DynamicLayoutPage() {
             return blocked === null ? [] : [blocked]
           }),
       }),
-    [obstacleA, obstacleB, width],
+    [obstacleA, obstacleB, layoutWidth],
   )
 
   const bodySlotResolver = useMemo(
     () =>
       createLineSlotResolver({
-        baseLineSlot: { left: 28, right: width - 28 },
+        baseLineSlot: { left: 28, right: layoutWidth - 28 },
         lineHeight,
         minWidth: 180,
         getBlockedLineRanges: (lineTop, lineBottom) =>
@@ -82,7 +97,7 @@ function DynamicLayoutPage() {
             return blocked === null ? [] : [blocked]
           }),
       }),
-    [lineHeight, obstacleC, width],
+    [lineHeight, obstacleC, layoutWidth],
   )
 
   const titleFlow = useTextFlow({
@@ -112,8 +127,14 @@ function DynamicLayoutPage() {
       <section className="showcase-grid">
         <aside className="panel controls-panel">
           <label className="field">
-            <span>Stage width: {width}px</span>
-            <input type="range" min="620" max="1080" value={width} onChange={(event) => setWidth(Number(event.target.value))} />
+            <span>Stage width: {layoutWidth}px</span>
+            <input
+              type="range"
+              min={stageSliderMin}
+              max={stageSliderMax}
+              value={layoutWidth}
+              onChange={(event) => setWidth(Number(event.target.value))}
+            />
           </label>
           <label className="field">
             <span>Stage height: {height}px</span>
@@ -136,30 +157,23 @@ function DynamicLayoutPage() {
             <div className="metric-box"><span>Body exhausted</span><strong>{bodyFlow.exhausted ? 'yes' : 'no'}</strong></div>
           </div>
 
-          <div className="dynamic-layout-stage" style={{ width: `${width}px`, height: `${height}px` }}>
-            <div className="dynamic-orb dynamic-orb-brand" style={{ left: `${obstacleA.x - obstacleA.radius}px`, top: `${obstacleA.y - obstacleA.radius}px`, width: `${obstacleA.radius * 2}px`, height: `${obstacleA.radius * 2}px` }} />
-            <div className="dynamic-orb dynamic-orb-outline" style={{ left: `${obstacleB.x - obstacleB.radius}px`, top: `${obstacleB.y - obstacleB.radius}px`, width: `${obstacleB.radius * 2}px`, height: `${obstacleB.radius * 2}px` }} />
-            <div className="dynamic-orb dynamic-orb-soft" style={{ left: `${obstacleC.x - obstacleC.radius}px`, top: `${obstacleC.y - obstacleC.radius}px`, width: `${obstacleC.radius * 2}px`, height: `${obstacleC.radius * 2}px` }} />
+          <div ref={stageWrapRef} className="dynamic-layout-stage-wrap">
+            <div className="dynamic-layout-stage" style={{ width: `${layoutWidth}px`, height: `${height}px` }}>
+              <div className="dynamic-orb dynamic-orb-brand" style={{ left: `${obstacleA.x - obstacleA.radius}px`, top: `${obstacleA.y - obstacleA.radius}px`, width: `${obstacleA.radius * 2}px`, height: `${obstacleA.radius * 2}px` }} />
+              <div className="dynamic-orb dynamic-orb-outline" style={{ left: `${obstacleB.x - obstacleB.radius}px`, top: `${obstacleB.y - obstacleB.radius}px`, width: `${obstacleB.radius * 2}px`, height: `${obstacleB.radius * 2}px` }} />
+              <div className="dynamic-orb dynamic-orb-soft" style={{ left: `${obstacleC.x - obstacleC.radius}px`, top: `${obstacleC.y - obstacleC.radius}px`, width: `${obstacleC.radius * 2}px`, height: `${obstacleC.radius * 2}px` }} />
 
-            {titleFlow.lines.map((line, index) => (
-              <div key={`title-${index}`} className="dynamic-title-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: titleFont, lineHeight: '42px' }}>
-                {line.text}
-              </div>
-            ))}
+              {titleFlow.lines.map((line, index) => (
+                <div key={`title-${index}`} className="dynamic-title-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: titleFont, lineHeight: '42px' }}>
+                  {line.text}
+                </div>
+              ))}
 
-            {bodyFlow.lines.map((line, index) => (
-              <div key={`body-${index}`} className="dynamic-body-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: bodyFont, lineHeight: `${lineHeight}px`, whiteSpace: 'pre' }}>
-                {line.text}
-              </div>
-            ))}
-
-            <div className="dynamic-layout-caption">
-              <PText
-                as="p"
-                typography={captionTypography}
-              >
-                Obstacles reserve geometry first. Text routing happens second.
-              </PText>
+              {bodyFlow.lines.map((line, index) => (
+                <div key={`body-${index}`} className="dynamic-body-line" style={{ left: `${line.slotLeft}px`, top: `${line.y}px`, width: `${Math.ceil(line.slotWidth)}px`, font: bodyFont, lineHeight: `${lineHeight}px`, whiteSpace: 'pre' }}>
+                  {line.text}
+                </div>
+              ))}
             </div>
           </div>
         </section>
