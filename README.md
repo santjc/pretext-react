@@ -8,7 +8,7 @@ Thin React primitives and re-exports for [`@chenglou/pretext`](https://www.npmjs
 - lay it out many times
 - use richer line-level primitives when composition gets more advanced
 
-The package does not try to hide `pretext` behind a large framework. Instead, it gives you a small React layer where React actually helps: width observation, memoized preparation, semantic DOM components, and opt-in experimental composition helpers.
+The package does not try to hide `pretext` behind a large framework. Instead, it gives you a small React layer where React actually helps: width observation, memoized preparation, semantic DOM components, and composition helpers when layout gets more advanced.
 
 ## Features
 
@@ -16,8 +16,8 @@ The package does not try to hide `pretext` behind a large framework. Instead, it
 - Thin React hooks over `prepare`, `prepareWithSegments`, `layout`, and `layoutWithLines`
 - `PText` component for semantic DOM text with measurement support
 - Width observation with `ResizeObserver`
-- Experimental text flow helpers for obstacle-aware layouts
-- Works well as a foundation for chat bubbles, measurement-heavy UIs, and editorial layout experiments
+- Public editorial text-flow helpers for obstacle-aware layouts
+- Works well as a foundation for measurement-heavy UIs, article layouts, and custom editorial composition
 
 ## Installation
 
@@ -56,9 +56,9 @@ import {
 - `usePretextLines`
 - `PText`
 
-## Experimental API
+## Editorial API
 
-Import experimental APIs from a dedicated subpath:
+Editorial APIs are available directly from the package root:
 
 ```ts
 import {
@@ -68,10 +68,21 @@ import {
   createLineSlotResolver,
   getCircleBlockedLineRangeForRow,
   pickWidestLineSlot,
-} from '@santjc/react-pretext/experimental'
+  PEditorialColumns,
+  PEditorialSurface,
+  PEditorialTrack,
+  PEditorialFigure,
+} from '@santjc/react-pretext'
 ```
 
-These APIs are useful and tested, but they are still more likely to change than the stable root API.
+These APIs are public and supported from the package root.
+
+Use them when you need:
+
+- custom line-by-line rendering
+- obstacle-aware text flow
+- multi-column continuation with cursor handoff
+- editorial or newspaper-style composition
 
 ## Why this package exists
 
@@ -97,20 +108,25 @@ function Example() {
   const text = 'Prepare once, layout often.'
   const font = '400 18px GeistVariable, sans-serif'
 
-  const { prepared, prepareMs } = usePreparedText({ text, font })
+  const { prepared } = usePreparedText({ text, font })
   const { height, lineCount } = usePretextLayout({
     prepared,
     width: 320,
     lineHeight: 28,
   })
 
-  return (
-    <div>
-      <div>prepare: {prepareMs.toFixed(3)}ms</div>
-      <div>{height}px / {lineCount} lines</div>
-    </div>
-  )
+  return <div>{height}px / {lineCount} lines</div>
 }
+```
+
+Enable profiling only when you need the timing metric:
+
+```tsx
+const { prepareMs } = usePreparedText({
+  text,
+  font,
+  enableProfiling: true,
+})
 ```
 
 ### Get actual lines from segmented text
@@ -181,7 +197,7 @@ function Example({ value }: { value: string }) {
 
 ## Editorial layout example
 
-For obstacle-aware layouts, use segmented preparation from the stable API and flow helpers from the experimental subpath.
+For obstacle-aware layouts, use segmented preparation from the stable API and the editorial helpers from the package root.
 
 ```tsx
 import { PText, usePreparedSegments } from '@santjc/react-pretext'
@@ -189,7 +205,7 @@ import {
   createLineSlotResolver,
   getCircleBlockedLineRangeForRow,
   useTextFlow,
-} from '@santjc/react-pretext/experimental'
+} from '@santjc/react-pretext'
 
 function EditorialExample({ width }: { width: number }) {
   const lineHeight = 30
@@ -287,13 +303,28 @@ The package works best if you treat it in layers:
 - observe width
 - render semantic DOM text
 
-### Experimental composition layer
+### Editorial layer
 - resolve available line slots
 - flow text around obstacles
 - assemble editorial or custom layouts
 
 If you are building normal UI text measurement, stay on the stable root API.
-If you are building custom layout systems, the experimental subpath is the right place to explore.
+If you are building custom layout systems, the editorial APIs on the root export are the right place to explore.
+
+## Current Scope
+
+What this package is good at today:
+
+- stable text preparation and measurement in React
+- semantic DOM rendering with `PText`
+- low-level line access for custom rendering
+- editorial surfaces and columns with figure obstacles and explicit justify spacing
+
+What it is not trying to be:
+
+- a general rich text editor
+- a DOM-based typography framework
+- a full publishing system
 
 ## Caveats
 
@@ -301,7 +332,17 @@ If you are building custom layout systems, the experimental subpath is the right
 - Webfont loading can affect measurement accuracy until the font is ready.
 - `PText` currently supports `string` children only.
 - `prepareOptions` currently map directly to pretext preparation options such as `whiteSpace`.
-- Experimental APIs are intentionally exported, but they are more likely to change than the stable root API.
+- `useTextFlow` expects a reference-stable `getLineSlotAtY` callback. Memoize it with `useMemo` when passing custom resolvers from React components.
+- `usePreparedText` only includes `prepareMs` when `enableProfiling: true` is passed.
+- Editorial `lineRenderMode="justify"` uses explicit `word-spacing` derived from pretext line measurements instead of browser `text-align: justify`. Complex whitespace cases fall back to left alignment.
+- `PEditorialFigure` treats explicit `x` and `y` as overrides over `placement`, and clamps the final position within the available bounds.
+
+The current package surface is intentionally small and public:
+
+- stable measurement hooks and `PText`
+- public editorial primitives on the root package export
+- explicit justify rendering based on pretext measurements
+- playground routes that exercise both measurement and editorial flow
 
 ## Contributing
 
@@ -313,6 +354,6 @@ Good contributions for this project usually look like one of these:
 - adding tests around public package behavior
 - improving TypeScript types and package DX
 - clarifying docs and examples
-- validating whether a helper belongs in the stable API or should remain experimental
+- validating whether a helper belongs in the root public API or should stay internal
 
 When contributing, prefer small, explicit abstractions over large convenience layers. The package is intentionally trying to stay close to `pretext`.

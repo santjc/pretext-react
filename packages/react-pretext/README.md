@@ -26,15 +26,23 @@ Stable React exports:
 - `usePretextLines`
 - `PText`
 
-## Experimental API
+## Editorial API
 
-Experimental helpers are exported from a separate subpath:
+Editorial helpers are exported from the package root:
 
 ```ts
-import { useTextFlow, flowText, carveLineSlots } from '@santjc/react-pretext/experimental'
+import {
+  useTextFlow,
+  flowText,
+  carveLineSlots,
+  PEditorialColumns,
+  PEditorialSurface,
+  PEditorialTrack,
+  PEditorialFigure,
+} from '@santjc/react-pretext'
 ```
 
-Current experimental exports:
+Current editorial exports:
 
 - `useTextFlow`
 - `flowText`
@@ -42,8 +50,14 @@ Current experimental exports:
 - `createLineSlotResolver`
 - `getCircleBlockedLineRangeForRow`
 - `pickWidestLineSlot`
+- `PEditorialColumns`
+- `PEditorialSurface`
+- `PEditorialTrack`
+- `PEditorialFigure`
 
-These APIs are useful and tested, but their naming and shape may still evolve.
+These APIs are public and tested.
+
+Reach for them when you need custom line rendering, obstacle-aware flow, or multi-column continuation.
 
 ## Examples
 
@@ -64,6 +78,16 @@ function Example() {
 
   return <div>{height}px / {lineCount} lines</div>
 }
+```
+
+Enable profiling only when you need the timing metric:
+
+```tsx
+const { prepareMs } = usePreparedText({
+  text,
+  font,
+  enableProfiling: true,
+})
 ```
 
 ### Get actual lines from segmented text
@@ -112,11 +136,10 @@ function Example() {
 }
 ```
 
-### Experimental text flow
+### Editorial text flow
 
 ```tsx
-import { usePreparedSegments } from '@santjc/react-pretext'
-import { createLineSlotResolver, useTextFlow } from '@santjc/react-pretext/experimental'
+import { usePreparedSegments, createLineSlotResolver, useTextFlow } from '@santjc/react-pretext'
 
 function Example() {
   const { prepared } = usePreparedSegments({
@@ -153,4 +176,8 @@ function Example() {
 - Webfont loading can affect measurement accuracy until the font is ready.
 - `PText` currently supports `string` children only.
 - `prepareOptions` currently map directly to pretext preparation options, such as `whiteSpace`.
-- Experimental APIs are exported intentionally, but they are more likely to change than the stable root API.
+- `useTextFlow` expects a reference-stable `getLineSlotAtY` callback. Memoize custom resolvers in React.
+- Editorial `lineRenderMode="justify"` uses pretext-derived `word-spacing` and will skip justification for unsupported whitespace patterns instead of delegating wrapping back to the browser.
+- `PEditorialFigure` treats explicit `x` and `y` as overrides over `placement`, and clamps the result within available bounds.
+
+The package exposes a single public root API surface.
