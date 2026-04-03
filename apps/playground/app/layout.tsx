@@ -11,21 +11,10 @@ export const metadata: Metadata = {
   description:
     'A React wrapper over pretext for deterministic text measurement from known typography and width. Start with measurement-driven UI, then explore the advanced editorial subpath.',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: {
+      url: '/icon.svg',
+      type: 'image/svg+xml',
+    },
   },
 }
 
