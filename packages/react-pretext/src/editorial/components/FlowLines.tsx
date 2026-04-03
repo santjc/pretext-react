@@ -34,19 +34,40 @@ function getFlowLineStyle(
   lineHeight: number,
   lineRenderMode: 'natural' | 'justify',
 ): CSSProperties {
+  const fontWithLineHeight = injectLineHeightIntoFontShorthand(font, lineHeight)
+
   return {
     position: 'absolute',
     left: `${line.slotLeft}px`,
     top: `${line.y}px`,
     width: `${Math.ceil(line.slotWidth)}px`,
-    font,
-    lineHeight: `${lineHeight}px`,
+    font: fontWithLineHeight,
     whiteSpace: 'pre',
     textAlign: 'left',
     wordSpacing: lineRenderMode === 'justify' && line.justifyWordSpacing !== null && line.justifyWordSpacing !== undefined
       ? `${line.justifyWordSpacing}px`
       : undefined,
   }
+}
+
+function injectLineHeightIntoFontShorthand(font: string, lineHeight: number) {
+  const match = font.match(
+    /(^|\s)(xx-small|x-small|small|medium|large|x-large|xx-large|xxx-large|smaller|larger|\d*\.?\d+(?:px|pt|pc|em|rem|ex|ch|vh|vw|vmin|vmax|%))(?:\/[^\s]+)?(?=\s)/,
+  )
+
+  if (match === null) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        '[react-pretext] FlowLines expected `font` to be a CSS font shorthand with an explicit size. Received:',
+        font,
+      )
+    }
+
+    return font
+  }
+
+  const [fullMatch, prefix, size] = match
+  return `${font.slice(0, match.index)}${prefix}${size}/${lineHeight}px${font.slice((match.index ?? 0) + fullMatch.length)}`
 }
 
 function getFlowLineKey(line: FlowRenderableLine, index: number) {

@@ -104,6 +104,27 @@ describe('useTruncatedText', () => {
     expect(result.current.visibleLineCount).toBe(2)
   })
 
+  it('keeps the requested visible line budget when truncating to three lines', () => {
+    const typography = createPretextTypography({
+      family: 'Inter, sans-serif',
+      size: 18,
+      lineHeight: 27,
+      width: 360,
+    })
+
+    const { result } = renderHook(() =>
+      useTruncatedText({
+        text: 'Use deterministic preview text in result cards, compact rows, and teasers where the visible copy itself affects layout. The package can return the exact string that fits within a known line budget.',
+        typography,
+        maxLines: 3,
+      }),
+    )
+
+    expect(result.current.didTruncate).toBe(true)
+    expect(result.current.visibleLineCount).toBe(3)
+    expect(result.current.fullLineCount).toBeGreaterThan(3)
+  })
+
   it('throws when maxLines is not a positive integer', () => {
     const typography = createPretextTypography({
       family: 'Inter, sans-serif',

@@ -280,6 +280,103 @@ import {
 
 These APIs are public and tested, but they are not part of the default adoption path. Reach for them when you need custom line rendering, obstacle-aware flow, or multi-column continuation.
 
+### Editorial mental model
+
+- `EditorialSurface` owns one text surface and lets figures carve space out of the available line slots.
+- `EditorialColumns` fragments one continuous text stream across multiple tracks while preserving reading order through a shared cursor.
+- `EditorialFigure` is a config object passed inside `figures`, not a separate React component export.
+- `font` should be a valid CSS font shorthand with an explicit size token (for example `400 15px Geist, sans-serif`).
+- `placement` gives you a coarse position, while explicit `x` and `y` let you animate or fine-tune the figure inside the available bounds.
+- `linePadding` expands the blocked area so text does not hug the figure too tightly.
+- The figure content is still your React content. Keep it sized to the declared `width` and `height`, because the layout reserves that geometry for text flow but does not auto-layout the figure's internal children for you.
+
+Use this subpath when the geometry itself is part of the layout model. If you only need measured height, line count, or truncation, stay on the root package.
+
+### EditorialSurface example
+
+Use `EditorialSurface` when one canvas owns the article and figures need to participate in wraparound layout:
+
+```tsx
+'use client'
+
+import { EditorialSurface } from '@santjc/react-pretext/editorial'
+
+export function FeatureBody({ text }: { text: string }) {
+  return (
+    <EditorialSurface
+      text={text}
+      font="400 15px Geist, sans-serif"
+      lineHeight={24}
+      minHeight={420}
+      lineRenderMode="justify"
+      figures={[
+        {
+          shape: 'circle',
+          width: 88,
+          height: 88,
+          placement: 'center-left',
+          linePadding: 12,
+          content: <div className="rounded-full border border-border bg-muted/50" />,
+        },
+        {
+          shape: 'rect',
+          width: 180,
+          height: 96,
+          placement: 'bottom-left',
+          linePadding: 14,
+          content: <aside className="rounded-xl border border-border bg-card p-4">Pull quote</aside>,
+        },
+      ]}
+    />
+  )
+}
+```
+
+### EditorialColumns example
+
+Use `EditorialColumns` when one article needs to continue across multiple tracks with declared figures inside individual columns:
+
+```tsx
+'use client'
+
+import { EditorialColumns } from '@santjc/react-pretext/editorial'
+
+export function EditorialSpread({ text, figureX, figureY }: { text: string; figureX: number; figureY: number }) {
+  return (
+    <EditorialColumns
+      text={text}
+      font="400 15px Geist, sans-serif"
+      lineHeight={24}
+      gap={24}
+      lineRenderMode="justify"
+      tracks={[
+        {
+          fr: 1.1,
+          minHeight: 420,
+          paddingInline: 14,
+          paddingBlock: 10,
+          figures: [
+            {
+              shape: 'circle',
+              width: 112,
+              height: 112,
+              x: figureX,
+              y: figureY,
+              linePadding: 16,
+              content: <div className="rounded-full border border-border bg-muted/50" />,
+            },
+          ],
+        },
+        { fr: 0.95, minHeight: 420, paddingInline: 14, paddingBlock: 10 },
+        { fr: 0.95, minHeight: 420, paddingInline: 14, paddingBlock: 10 },
+      ]}
+    />
+  )
+}
+```
+
+In this model, the article text is still one stream. The first track lays out until it runs out of space, then the next track continues from the returned cursor.
+
 ## SSR and runtime guidance
 
 Measurement depends on canvas-backed text metrics, so the measurement hooks are a client-side feature.
