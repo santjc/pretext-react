@@ -9,7 +9,7 @@ const _geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono
 export const metadata: Metadata = {
   title: '@santjc/react-pretext - deterministic text measurement for React',
   description:
-    'A React wrapper over pretext for deterministic text measurement from known typography and width. Start with measurement-driven UI, then explore the advanced editorial subpath.',
+    'A React wrapper over @chenglou/pretext for deterministic text measurement from known typography and width. Start with measurement-driven UI, then explore the advanced editorial subpath.',
   icons: {
     icon: {
       url: '/icon.svg',

@@ -1,6 +1,7 @@
 import { AdoptionPath } from "@/components/adoption-path"
 import { DemoCard } from "@/components/demo-card"
 import { SectionHeader } from "@/components/section-header"
+import Link from "next/link"
 
 export function OverviewSection() {
   return (
@@ -11,21 +12,29 @@ export function OverviewSection() {
             Start here
           </span>
           <h2 className="text-2xl font-semibold text-foreground mb-3 text-balance md:text-3xl">
-            Start from real UI problems, not the advanced edge cases.
+            React wrapper for deterministic text measurement.
           </h2>
           <p className="text-muted-foreground leading-relaxed max-w-2xl">
-            The root package is the default path: define typography once, measure text from known width, and use those results in real React UI. The editorial subpath is public too, but it is for layouts where figures, fixed geometry, or track continuation need to shape the text flow.
+            Install the package, start with the root API, and use the core demos below to measure text height, line count, and truncation in real UI.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3 text-xs font-mono">
-            <span className="px-2.5 py-1 bg-secondary rounded border border-border text-foreground">
-              Package <span className="text-muted-foreground">0.1.0</span>
-            </span>
-            <span className="px-2.5 py-1 bg-secondary rounded border border-border text-foreground">
-              Surface <span className="text-primary">root / editorial / pretext</span>
-            </span>
-            <span className="px-2.5 py-1 bg-secondary rounded border border-border text-foreground">
-              Focus <span className="text-primary">measurement-driven UI and explicit flow</span>
-            </span>
+          <div className="mt-6 rounded-md border border-border bg-secondary/30 px-4 py-3 font-mono text-sm text-foreground">
+            npm install @santjc/react-pretext react react-dom
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/core"
+              className="inline-flex items-center rounded-md border border-primary/30 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Get started
+            </Link>
+            <a
+              href="https://www.npmjs.com/package/@santjc/react-pretext"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-muted-foreground/30 hover:bg-secondary/40"
+            >
+              View on npm
+            </a>
           </div>
         </div>
       </section>

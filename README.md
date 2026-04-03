@@ -1,8 +1,8 @@
 # @santjc/react-pretext
 
-Simple React wrapper over [`@chenglou/pretext`](https://www.npmjs.com/package/@chenglou/pretext) for deterministic text measurement before paint, without DOM reads.
+Simple React wrapper over [`@chenglou/pretext`](https://github.com/chenglou/pretext/) for deterministic text measurement before paint, without DOM reads.
 
-`@santjc/react-pretext` is intentionally a small React layer over `@chenglou/pretext`. It predicts text height and line count from text, typography, and width before layout hits the DOM. The core use case is measurement-driven UI: accordions, cards, previews, virtualized rows, and responsive layouts where text height affects placement.
+`@santjc/react-pretext` is intentionally a small React layer over `@chenglou/pretext` by Cheng Lou. It predicts text height and line count from text, typography, and width before layout hits the DOM. The core use case is measurement-driven UI: accordions, cards, previews, virtualized rows, and responsive layouts where text height affects placement.
 
 The package has three layers:
 

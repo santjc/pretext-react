@@ -1,10 +1,10 @@
 # @santjc/react-pretext
 
-Simple React wrapper over [`@chenglou/pretext`](https://www.npmjs.com/package/@chenglou/pretext) for deterministic text measurement before paint, without DOM reads.
+Simple React wrapper over [`@chenglou/pretext`](https://github.com/chenglou/pretext/) for deterministic text measurement before paint, without DOM reads.
 
-`@santjc/react-pretext` is intentionally a small React layer over `@chenglou/pretext`. It lets you predict text height and line count from text, typography, and width before the browser renders the final layout. The core use case is measurement-driven UI: accordions, cards, virtualized lists, previews, and any responsive layout where text height affects placement.
+`@santjc/react-pretext` is intentionally a small React layer over `@chenglou/pretext` by Cheng Lou. It lets you predict text height and line count from text, typography, and width before the browser renders the final layout. The core use case is measurement-driven UI: accordions, cards, virtualized lists, previews, and any responsive layout where text height affects placement.
 
-The package keeps the original `pretext` model intact and adds React-facing hooks, types, and semantic rendering helpers where React actually helps.
+The package keeps the original `@chenglou/pretext` model intact and adds React-facing hooks, types, and semantic rendering helpers where React actually helps.
 
 The intended adoption path is:
 
@@ -21,6 +21,12 @@ npm install @santjc/react-pretext react react-dom
 ```
 
 Peer dependencies: React 18 or 19.
+
+## Playground
+
+Interactive demos for the core path and the advanced editorial subpath:
+
+- https://pretext-react-playground-three.vercel.app/
 
 ## Why use it
 

@@ -10,7 +10,7 @@ export function Header() {
         for React
       </h1>
       <p className="max-w-xl text-muted-foreground leading-relaxed">
-        A React wrapper over pretext for predicting text layout from known typography and width. Start with measurement-driven UI in the root package, then reach for the editorial subpath when declared geometry needs to shape the flow.
+        A React wrapper over @chenglou/pretext for predicting text layout from known typography and width. Start with measurement-driven UI in the root package, then reach for the editorial subpath when declared geometry needs to shape the flow.
       </p>
     </header>
   )
