@@ -36,7 +36,7 @@ jobs:
 
       - name: Verify package version
         run: |
-          VERSION=$(npm pkg get version -w @santjc/react-pretext | tr -d '"')
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('packages/react-pretext/package.json', 'utf8')).version")
           if [ "$VERSION" != "${{ inputs.expected_version }}" ]; then
             echo "Expected version ${{ inputs.expected_version }}, found $VERSION"
             exit 1
