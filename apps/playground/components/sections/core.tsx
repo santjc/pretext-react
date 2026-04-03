@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { PText, createPretextTypography, useMeasuredText, useTruncatedText } from "@santjc/react-pretext"
+import { PText, createPretextTypography, useElementWidth, useMeasuredText, useTruncatedText } from "@santjc/react-pretext"
 import { ShowcaseDemo } from "@/components/showcase-demo"
 
 const measureMaxWidth = 400
@@ -155,6 +155,160 @@ const { height, lineCount } = useMeasuredText({ text, typography })`
         content: (
           <>
             The same typography object can feed measurement and render output, so width, font, and line height do not drift apart.
+          </>
+        ),
+      }}
+    />
+  )
+}
+
+function ResponsiveMeasurePreview({
+  shellWidth,
+  text,
+  fontSize,
+  lineHeight,
+}: {
+  shellWidth: number
+  text: string
+  fontSize: number
+  lineHeight: number
+}) {
+  const { ref, width } = useElementWidth<HTMLDivElement>()
+
+  const typography = useMemo(
+    () =>
+      createPretextTypography({
+        family: "Geist, sans-serif",
+        size: fontSize,
+        weight: 400,
+        lineHeight,
+        width,
+      }),
+    [fontSize, lineHeight, width],
+  )
+
+  const { height, lineCount, isReady } = useMeasuredText({
+    text,
+    typography,
+    enabled: width > 0,
+  })
+
+  return (
+    <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-6">
+      <div className="w-full" style={{ maxWidth: `${shellWidth + 64}px` }}>
+        <div className="mb-3 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-muted-foreground">
+          <span>Observed container</span>
+          <span>{width > 0 ? `${Math.round(width)}px measured` : "Waiting for width"}</span>
+        </div>
+        <div className="rounded-2xl border border-border bg-background/80 p-4 shadow-sm" style={{ width: `${shellWidth}px` }}>
+          <div ref={ref} className="rounded-[1.75rem] rounded-tr-md bg-primary px-4 py-3 text-primary-foreground shadow-sm">
+            <div className="mb-2 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-primary-foreground/70">
+              <span>Live width</span>
+              <span>{isReady ? `${height}px tall / ${lineCount} lines` : "Measuring"}</span>
+            </div>
+            <p className="whitespace-pre-wrap" style={typography.style}>
+              {text}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ResponsiveWidthDemo() {
+  const [text, setText] = useState("When the layout owns the width, observe the real container and feed that number into useMeasuredText(). This keeps the package grounded in the same responsive box model the UI already uses, instead of relying on a hardcoded demo width.")
+  const [shellWidth, setShellWidth] = useState(360)
+  const [fontSize, setFontSize] = useState(20)
+  const [lineHeight, setLineHeight] = useState(30)
+
+  const observedWidth = Math.max(0, shellWidth - 32)
+  const previewTypography = useMemo(
+    () =>
+      createPretextTypography({
+        family: "Geist, sans-serif",
+        size: fontSize,
+        weight: 400,
+        lineHeight,
+        width: observedWidth,
+      }),
+    [fontSize, lineHeight, observedWidth],
+  )
+
+  const previewMeasure = useMeasuredText({
+    text,
+    typography: previewTypography,
+    enabled: observedWidth > 0,
+  })
+
+  const code = `const { ref, width } = useElementWidth<HTMLDivElement>()
+
+const typography = createPretextTypography({
+  family: 'Geist, sans-serif',
+  size: ${fontSize},
+  weight: 400,
+  lineHeight: ${lineHeight},
+  width,
+})
+
+const { height, lineCount } = useMeasuredText({
+  text,
+  typography,
+  enabled: width > 0,
+})
+
+<div ref={ref}>
+  <div style={{ height: isOpen ? \`\${height}px\` : '0px' }} />
+</div>`
+
+  return (
+    <ShowcaseDemo
+      id="responsive-width"
+      label="Core"
+      labelVariant="core"
+      title="Observe responsive width before measuring text"
+      description="Use useElementWidth() when the container width comes from the real layout instead of a prop. The observed width becomes the typography input, and useMeasuredText() stays on the same deterministic path."
+      metrics={[
+        { label: "Shell width", value: shellWidth, unit: "px" },
+        { label: "Observed width", value: observedWidth, unit: "px" },
+        { label: "Predicted height", value: previewMeasure.isReady ? previewMeasure.height : "--", unit: previewMeasure.isReady ? "px" : undefined },
+        { label: "Line count", value: previewMeasure.isReady ? previewMeasure.lineCount : "--" },
+      ]}
+      preview={<ResponsiveMeasurePreview shellWidth={shellWidth} text={text} fontSize={fontSize} lineHeight={lineHeight} />}
+      code={code}
+      controls={
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <span className="text-sm text-muted-foreground block">Text</span>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={4}
+              className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <ShowcaseDemo.SliderControl label="Shell width" value={shellWidth} min={240} max={420} onChange={setShellWidth} />
+          <ShowcaseDemo.SliderControl
+            label="Font size"
+            value={fontSize}
+            min={12}
+            max={32}
+            onChange={setFontSize}
+          />
+          <ShowcaseDemo.SliderControl
+            label="Line height"
+            value={lineHeight}
+            min={16}
+            max={48}
+            onChange={setLineHeight}
+          />
+        </div>
+      }
+      callout={{
+        title: "Real layout inputs",
+        content: (
+          <>
+            This is the bridge between the low-friction demo and production UI. If layout already determines width, observe that container once and keep feeding the measured width back into <code className="text-xs font-mono bg-background px-1 py-0.5 rounded">useMeasuredText()</code>.
           </>
         ),
       }}
@@ -509,6 +663,8 @@ export function CoreSection() {
         <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Jump to:</span>
         <a href="#measure" className="text-sm text-foreground hover:text-primary transition-colors">Measure</a>
         <span className="text-muted-foreground">/</span>
+        <a href="#responsive-width" className="text-sm text-foreground hover:text-primary transition-colors">Responsive width</a>
+        <span className="text-muted-foreground">/</span>
         <a href="#scrollheight" className="text-sm text-foreground hover:text-primary transition-colors">ScrollHeight</a>
         <span className="text-muted-foreground">/</span>
         <a href="#truncate" className="text-sm text-foreground hover:text-primary transition-colors">Truncate</a>
@@ -517,6 +673,7 @@ export function CoreSection() {
       </nav>
 
       <MeasureDemo />
+      <ResponsiveWidthDemo />
       <ScrollHeightDemo />
       <TruncateDemo />
       <PTextDemo />

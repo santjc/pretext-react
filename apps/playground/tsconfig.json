@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "lib": [
       "dom",
       "dom.iterable",
@@ -25,6 +26,15 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@santjc/react-pretext": [
+        "../../packages/react-pretext/src/index.ts"
+      ],
+      "@santjc/react-pretext/editorial": [
+        "../../packages/react-pretext/src/editorial.ts"
+      ],
+      "@santjc/react-pretext/pretext": [
+        "../../packages/react-pretext/src/pretext.ts"
       ]
     }
   },
