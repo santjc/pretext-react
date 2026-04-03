@@ -10,6 +10,7 @@ import {
 } from "@santjc/react-pretext/editorial"
 import { CodeBlock } from "@/components/code-block"
 import { Slider } from "@/components/ui/slider"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const dynamicTitle =
   "Dynamic layouts can reroute headlines and body copy around fixed obstacles without asking the browser where the text landed."
@@ -87,13 +88,12 @@ function ControlSlider({
 }
 
 export function DynamicLayoutSection() {
+  const isMobile = useIsMobile()
   const [width, setWidth] = useState(860)
   const [height, setHeight] = useState(620)
   const [lineHeight, setLineHeight] = useState(26)
   const [maxStageWidth, setMaxStageWidth] = useState(980)
   const stageWrapRef = useRef<HTMLDivElement>(null)
-  const titleFont = "700 34px Geist, sans-serif"
-  const bodyFont = "400 16px Geist, sans-serif"
 
   useEffect(() => {
     const element = stageWrapRef.current
@@ -102,7 +102,7 @@ export function DynamicLayoutSection() {
     }
 
     const measure = () => {
-      setMaxStageWidth(Math.max(640, Math.min(980, Math.floor(element.clientWidth - 2))))
+      setMaxStageWidth(Math.max(320, Math.min(980, Math.floor(element.clientWidth - 2))))
     }
 
     measure()
@@ -116,7 +116,16 @@ export function DynamicLayoutSection() {
   }, [])
 
   const layoutWidth = Math.min(width, maxStageWidth)
-  const stageSliderMin = 640
+  const compactStage = isMobile || layoutWidth < 640
+  const resolvedStagePadding = compactStage ? 18 : stagePadding
+  const titleLineHeight = compactStage ? 36 : 42
+  const titleBandHeight = compactStage ? 192 : 196
+  const bodyStartY = compactStage ? 212 : 218
+  const titleFont = compactStage ? "700 28px Geist, sans-serif" : "700 34px Geist, sans-serif"
+  const bodyFont = compactStage ? "400 15px Geist, sans-serif" : "400 16px Geist, sans-serif"
+  const titleBadgeWidth = compactStage ? 140 : titleBadge.width
+  const titleBadgeHeight = compactStage ? 72 : titleBadge.height
+  const stageSliderMin = 320
   const stageSliderMax = Math.max(stageSliderMin, maxStageWidth)
 
   const titlePrepared = usePreparedSegments({ text: dynamicTitle, font: titleFont })
@@ -126,22 +135,23 @@ export function DynamicLayoutSection() {
     options: { whiteSpace: "pre-wrap" },
   })
 
-  const obstacleAX = Math.round(layoutWidth * 0.12)
-  const obstacleAY = 42
-  const obstacleARadius = 58
-  const obstacleBX = Math.round(layoutWidth * 0.78)
-  const obstacleBY = 78
-  const obstacleBRadius = 84
-  const obstacleCX = Math.round(layoutWidth * 0.68)
-  const obstacleCY = 292
-  const obstacleCRadius = 74
+  const obstacleScale = compactStage ? 0.56 : 1
+  const obstacleAX = Math.round(layoutWidth * (compactStage ? 0.14 : 0.12))
+  const obstacleAY = compactStage ? 40 : 42
+  const obstacleARadius = Math.round(58 * obstacleScale)
+  const obstacleBX = Math.round(layoutWidth * (compactStage ? 0.84 : 0.78))
+  const obstacleBY = compactStage ? 54 : 78
+  const obstacleBRadius = Math.round(84 * obstacleScale)
+  const obstacleCX = Math.round(layoutWidth * (compactStage ? 0.7 : 0.68))
+  const obstacleCY = compactStage ? 244 : 292
+  const obstacleCRadius = Math.round(74 * obstacleScale)
 
   const titleSlotResolver = useMemo(
     () =>
       createLineSlotResolver({
-        baseLineSlot: { left: 28, right: layoutWidth - 28 },
-        lineHeight: 42,
-        minWidth: 240,
+        baseLineSlot: { left: resolvedStagePadding, right: layoutWidth - resolvedStagePadding },
+        lineHeight: titleLineHeight,
+        minWidth: compactStage ? 160 : 240,
         getBlockedLineRanges: (lineTop, lineBottom) => {
           const blocked = [
             { x: obstacleAX, y: obstacleAY, radius: obstacleARadius },
@@ -159,32 +169,34 @@ export function DynamicLayoutSection() {
             return blocked === null ? [] : [blocked]
           })
 
-          const badgeRange = getRectBlockedRange({
-            x: Math.min(layoutWidth - titleBadge.width - stagePadding, titleBadge.x),
-            y: titleBadge.y,
-            width: titleBadge.width,
-            height: titleBadge.height,
-            lineTop,
-            lineBottom,
-            padding: 16,
-          })
+          if (!compactStage) {
+            const badgeRange = getRectBlockedRange({
+              x: Math.min(layoutWidth - titleBadgeWidth - resolvedStagePadding, titleBadge.x),
+              y: titleBadge.y,
+              width: titleBadgeWidth,
+              height: titleBadgeHeight,
+              lineTop,
+              lineBottom,
+              padding: 16,
+            })
 
-          if (badgeRange !== null) {
-            blocked.push(badgeRange)
+            if (badgeRange !== null) {
+              blocked.push(badgeRange)
+            }
           }
 
           return blocked
         },
       }),
-    [layoutWidth, obstacleARadius, obstacleAX, obstacleAY, obstacleBRadius, obstacleBX, obstacleBY],
+    [compactStage, layoutWidth, obstacleARadius, obstacleAX, obstacleAY, obstacleBRadius, obstacleBX, obstacleBY, resolvedStagePadding, titleBadgeHeight, titleBadgeWidth, titleLineHeight],
   )
 
   const bodySlotResolver = useMemo(
     () =>
       createLineSlotResolver({
-        baseLineSlot: { left: stagePadding, right: layoutWidth - stagePadding },
+        baseLineSlot: { left: resolvedStagePadding, right: layoutWidth - resolvedStagePadding },
         lineHeight,
-        minWidth: 180,
+        minWidth: compactStage ? 140 : 180,
         getBlockedLineRanges: (lineTop, lineBottom) =>
           [{ x: obstacleCX, y: obstacleCY, radius: obstacleCRadius }].flatMap((orb) => {
             const blocked = getCircleBlockedLineRangeForRow({
@@ -199,21 +211,21 @@ export function DynamicLayoutSection() {
             return blocked === null ? [] : [blocked]
           }),
       }),
-    [layoutWidth, lineHeight, obstacleCRadius, obstacleCX, obstacleCY],
+    [compactStage, layoutWidth, lineHeight, obstacleCRadius, obstacleCX, obstacleCY, resolvedStagePadding],
   )
 
   const titleFlow = useTextFlow({
     prepared: titlePrepared.prepared,
-    lineHeight: 42,
+    lineHeight: titleLineHeight,
     getLineSlotAtY: titleSlotResolver,
-    maxY: 196,
+    maxY: titleBandHeight,
   })
 
   const bodyFlow = useTextFlow({
     prepared: bodyPrepared.prepared,
     lineHeight,
     getLineSlotAtY: bodySlotResolver,
-    startY: 218,
+    startY: bodyStartY,
     maxY: height - 24,
   })
 
@@ -263,13 +275,13 @@ export function DynamicLayoutSection() {
             </div>
           </div>
 
-          <div ref={stageWrapRef} className="mx-auto max-w-[1040px] rounded-xl border border-border bg-[#0b0d10] p-4 md:p-6 overflow-x-auto">
+          <div ref={stageWrapRef} className="mx-auto max-w-[1040px] rounded-xl border border-border bg-[#0b0d10] p-4 md:p-6">
             <div
               className="relative overflow-hidden rounded-[28px] border border-white/8 bg-[radial-gradient(circle_at_top_left,_rgba(109,40,217,0.12),_transparent_32%),linear-gradient(180deg,#171a21_0%,#101319_100%)]"
               style={{ width: `${layoutWidth}px`, height: `${height}px` }}
             >
-              <div className="absolute inset-x-0 top-0 h-[196px] border-b border-white/8" />
-              <div className="absolute right-7 top-6 w-44 rounded-2xl border border-primary/30 bg-primary/10 p-4 text-xs uppercase tracking-[0.18em] text-primary">
+              <div className="absolute inset-x-0 top-0 border-b border-white/8" style={{ height: `${titleBandHeight}px` }} />
+              <div className="absolute rounded-2xl border border-primary/30 bg-primary/10 p-4 text-xs uppercase tracking-[0.18em] text-primary" style={{ right: compactStage ? "16px" : "28px", top: compactStage ? "16px" : "24px", width: `${titleBadgeWidth}px`, minHeight: `${titleBadgeHeight}px` }}>
                 Slot-driven title routing
               </div>
 
@@ -289,7 +301,7 @@ export function DynamicLayoutSection() {
               <FlowLines
                 lines={titleFlow.lines}
                 font={titleFont}
-                lineHeight={42}
+                lineHeight={titleLineHeight}
                 lineClassName="font-semibold tracking-tight text-white"
               />
 

@@ -17,7 +17,7 @@ export function OverviewSection() {
           <p className="text-muted-foreground leading-relaxed max-w-2xl">
             Install the package, start with the root API, and use the core demos below to measure text height, line count, and truncation in real UI.
           </p>
-          <div className="mt-6 rounded-md border border-border bg-secondary/30 px-4 py-3 font-mono text-sm text-foreground">
+          <div className="mt-6 overflow-x-auto rounded-md border border-border bg-secondary/30 px-4 py-3 font-mono text-sm whitespace-nowrap text-foreground">
             npm install @santjc/react-pretext react react-dom
           </div>
           <div className="mt-6 flex flex-wrap gap-3">

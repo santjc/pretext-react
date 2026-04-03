@@ -144,9 +144,9 @@ export function SliderControl({
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-sm text-muted-foreground">{label}</span>
-        <span className="text-sm font-mono text-foreground">{value}{unit}</span>
+        <span className="min-w-0 text-sm font-mono text-foreground">{value}{unit}</span>
       </div>
       <input
         type="range"

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { createPretextTypography, useMeasuredText } from "@santjc/react-pretext"
 import { Slider } from "@/components/ui/slider"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { CodeBlock } from "@/components/code-block"
 
 function ControlSlider({
@@ -96,15 +97,17 @@ const cardContent: Omit<CardData, "lines" | "height">[] = [
 ]
 
 export function CardsSection() {
+  const isMobile = useIsMobile()
   const [containerWidth, setContainerWidth] = useState(720)
   const [columns, setColumns] = useState(2)
   const [bodySize, setBodySize] = useState(16)
   const [bodyLeading, setBodyLeading] = useState(26)
   const titleLeading = Math.round(bodySize * 1.25)
+  const effectiveColumns = isMobile ? 1 : columns
 
   const columnWidth = useMemo(() => {
-    return Math.floor((containerWidth - cardGap * (columns - 1)) / columns)
-  }, [containerWidth, columns])
+    return Math.floor((containerWidth - cardGap * (effectiveColumns - 1)) / effectiveColumns)
+  }, [containerWidth, effectiveColumns])
 
   const textWidth = Math.max(0, columnWidth - 32)
 
@@ -172,7 +175,7 @@ export function CardsSection() {
   }, [bodyMeasurements, titleMeasurements])
 
   const packedColumns = useMemo(() => {
-    const nextColumns = Array.from({ length: columns }, () => ({ cards: [] as CardData[], height: 0 }))
+    const nextColumns = Array.from({ length: effectiveColumns }, () => ({ cards: [] as CardData[], height: 0 }))
 
     cards.forEach((card) => {
       const shortestColumnIndex = nextColumns.reduce((bestIndex, column, index, allColumns) => {
@@ -188,7 +191,7 @@ export function CardsSection() {
     })
 
     return nextColumns
-  }, [cards, columns])
+  }, [cards, effectiveColumns])
 
   const tallestColumn = useMemo(() => {
     return Math.max(...packedColumns.map((column) => column.height), 0)
@@ -251,7 +254,7 @@ export function CardsSection() {
       <div className="border border-border rounded-lg bg-card overflow-hidden">
         {/* Metrics Row */}
         <div className="p-6 border-b border-border bg-secondary/20">
-          <div className="flex">
+          <div className="flex flex-wrap">
             <MetricBox label="Cards" value={cards.length.toString()} />
             <MetricBox label="Column width" value={`${columnWidth}px`} />
             <MetricBox label="Predicted tallest column" value={`${tallestColumn}px`} />
@@ -264,12 +267,12 @@ export function CardsSection() {
             className="mx-auto"
             style={{ maxWidth: `${containerWidth}px` }}
           >
-            <div
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              }}
-            >
+              <div
+                className="grid gap-4"
+                style={{
+                  gridTemplateColumns: `repeat(${effectiveColumns}, 1fr)`,
+                }}
+              >
               {packedColumns.map((column, columnIndex) => (
                 <div key={columnIndex} className="space-y-4">
                   {column.cards.map((card) => (

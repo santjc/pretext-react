@@ -257,13 +257,13 @@ function NewspaperLayout({
   return (
     <div className="text-[#1a1a1a] font-serif max-w-4xl mx-auto">
       <div className="text-center border-b-2 border-[#1a1a1a] pb-4 mb-4">
-        <div className="flex items-center justify-between text-[10px] tracking-widest mb-2">
-          <div className="flex gap-4">
+        <div className="mb-2 flex flex-col gap-2 text-[10px] tracking-widest sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
             <span>V0.1.0</span>
             <span>PUBLIC API</span>
           </div>
-          <span>DETERMINISTIC TEXT MEASUREMENT BEFORE PAINT</span>
-          <div className="text-right">
+          <span className="sm:text-center">DETERMINISTIC TEXT MEASUREMENT BEFORE PAINT</span>
+          <div className="sm:text-right">
             <span className="text-primary font-bold">SURFACE</span>
             <span className="text-2xl font-bold text-primary ml-2">3</span>
           </div>
@@ -286,7 +286,7 @@ function NewspaperLayout({
         </p>
       </div>
 
-      <div className="grid grid-cols-3" style={{ gap: `${trackGap}px` }}>
+      <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: `${trackGap}px` }}>
         <div className="space-y-4">
           <div>
             <h3 className="text-sm font-black mb-2 leading-tight">
@@ -367,7 +367,7 @@ function NewspaperLayout({
       </div>
 
       <div
-        className="grid grid-cols-3 border-t border-[#1a1a1a] mt-6 pt-4"
+        className="grid grid-cols-1 border-t border-[#1a1a1a] mt-6 pt-4 md:grid-cols-3"
         style={{ gap: `${trackGap}px` }}
       >
         <div>

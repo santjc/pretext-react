@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { SegmentedControl } from "@/components/showcase-layout"
 import { Slider } from "@/components/ui/slider"
 import { CodeBlock } from "@/components/code-block"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const editorialColumnsText = `A real editorial spread starts from declared geometry, not from decorative overlays. The body text stays one continuous article, while the layout decides how that article fragments across tracks with shared cursor state.
 
@@ -65,9 +66,9 @@ function Orb({ size = 64 }: { size?: number }) {
 
 function PullQuote({ className }: { className?: string }) {
   return (
-    <div className={cn("h-full rounded-xl border border-border bg-card/90 p-4 text-sm text-foreground shadow-sm", className)}>
-      <p className="text-xs font-mono uppercase tracking-wider text-primary">Pull Quote</p>
-      <p className="mt-3 leading-relaxed">
+    <div className={cn("h-full overflow-hidden rounded-xl border border-border bg-card/90 p-3 text-xs text-foreground shadow-sm sm:p-4 sm:text-sm", className)}>
+      <p className="text-[11px] font-mono uppercase tracking-wider text-primary sm:text-xs">Pull Quote</p>
+      <p className="mt-2 leading-relaxed sm:mt-3">
         Declare the figure, then let the text route around it.
       </p>
     </div>
@@ -99,6 +100,7 @@ export function EditorialEngineSection() {
 }
 
 function AnimatedGeometryDemo() {
+  const isMobile = useIsMobile()
   const [trackGap, setTrackGap] = useState(22)
   const [bodyLeading, setBodyLeading] = useState(24)
   const [isAnimating, setIsAnimating] = useState(true)
@@ -134,8 +136,8 @@ function AnimatedGeometryDemo() {
   const columnFont = `400 15px Geist, sans-serif`
 
   const tracks = useMemo(
-    () => [
-      {
+    () => {
+      const primaryTrack = {
         fr: 1.08,
         minHeight: 420,
         paddingInline: 14,
@@ -159,21 +161,29 @@ function AnimatedGeometryDemo() {
             content: <PullQuote />,
           },
         ],
-      },
-      {
-        fr: 0.92,
-        minHeight: 420,
-        paddingInline: 14,
-        paddingBlock: 10,
-      },
-      {
-        fr: 0.92,
-        minHeight: 420,
-        paddingInline: 14,
-        paddingBlock: 10,
-      },
-    ],
-    [orbPosition.x, orbPosition.y],
+      }
+
+      if (isMobile) {
+        return [primaryTrack]
+      }
+
+      return [
+        primaryTrack,
+        {
+          fr: 0.92,
+          minHeight: 420,
+          paddingInline: 14,
+          paddingBlock: 10,
+        },
+        {
+          fr: 0.92,
+          minHeight: 420,
+          paddingInline: 14,
+          paddingBlock: 10,
+        },
+      ]
+    },
+    [isMobile, orbPosition.x, orbPosition.y],
   )
 
   return (
@@ -195,7 +205,7 @@ function AnimatedGeometryDemo() {
       </div>
 
       <div className="grid lg:grid-cols-[1fr_280px]">
-        <div className="p-6 bg-background min-h-[320px] relative border-r border-border">
+        <div className="relative min-h-[320px] bg-background p-6 lg:border-r lg:border-border">
           <EditorialColumns
             text={editorialColumnsText}
             font={columnFont}

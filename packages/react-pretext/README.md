@@ -9,8 +9,9 @@ The package keeps the original `@chenglou/pretext` model intact and adds React-f
 The intended adoption path is:
 
 - define typography once
-- measure text with `useMeasuredText()`
-- render semantic DOM with `PText`
+- measure text with `useMeasuredText()` when width is already known
+- observe responsive width with `useElementWidth()` when layout owns the width
+- render semantic DOM with `PText` when measurement and DOM output should stay aligned
 - use predicted heights in normal UI like accordions, cards, lists, and previews
 - opt into editorial flow only when you need custom line routing
 
@@ -61,31 +62,35 @@ function Example({ text }: { text: string }) {
 
 Use this for the common case where a component needs a known text height, line count, or both.
 
-### Use shared typography with `PText`
+### Observe responsive width with `useElementWidth()`
 
 ```tsx
-import { PText, createPretextTypography } from '@santjc/react-pretext'
+import { createPretextTypography, useElementWidth, useMeasuredText } from '@santjc/react-pretext'
 
-function Example() {
-  const body = createPretextTypography({
+function Example({ text }: { text: string }) {
+  const { ref, width } = useElementWidth<HTMLDivElement>()
+
+  const typography = createPretextTypography({
     family: 'Inter, sans-serif',
     size: 18,
     weight: 400,
     lineHeight: 28,
-    width: 320,
+    width,
   })
 
-  return (
-    <PText as="p" typography={body}>
-      Semantic text with one source of truth for measurement and render output.
-    </PText>
-  )
+  const { height, lineCount, isReady } = useMeasuredText({
+    text,
+    typography,
+    enabled: width > 0,
+  })
+
+  return <div ref={ref}>{isReady ? `${width}px / ${height}px / ${lineCount} lines` : 'Measuring'}</div>
 }
 ```
 
-`PText` is a semantic rendering helper for the shared typography object. It is useful when you want real DOM output to stay aligned with the same measurement inputs, but the main measurement story still starts with hooks.
+Use this when the container width comes from the real layout instead of a prop. `useElementWidth()` gives you the responsive width, and `useMeasuredText()` stays on the same deterministic path.
 
-### Let `PText` observe responsive width
+### Use shared typography with `PText`
 
 ```tsx
 import { PText, createPretextTypography } from '@santjc/react-pretext'
@@ -108,6 +113,39 @@ function Example() {
 }
 ```
 
+`PText` is a semantic rendering helper for the shared typography object. It is useful when you want real DOM output to stay aligned with the same measurement inputs, but the main measurement story still starts with hooks.
+
+### Use `PText` when semantic DOM and measurement stay together
+
+```tsx
+import { useState } from 'react'
+import { PText, createPretextTypography } from '@santjc/react-pretext'
+
+function Example() {
+  const [measure, setMeasure] = useState({ width: 0, height: 0, lineCount: 0 })
+
+  const body = createPretextTypography({
+    family: 'Inter, sans-serif',
+    size: 18,
+    weight: 400,
+    lineHeight: 28,
+  })
+
+  return (
+    <>
+      <div>{measure.width}px / {measure.height}px / {measure.lineCount} lines</div>
+      <div style={{ width: 'min(100%, 36rem)' }}>
+        <PText as="p" typography={body} onMeasure={setMeasure}>
+          Semantic DOM stays aligned with the same typography input used for measurement.
+        </PText>
+      </div>
+    </>
+  )
+}
+```
+
+Use `PText` when the component needs a real semantic element in the DOM and aligned measurement data through `onMeasure`.
+
 ### Replace hidden measurement or `scrollHeight`
 
 Before:
@@ -125,13 +163,13 @@ After:
 ```tsx
 import { createPretextTypography, useMeasuredText, PText } from '@santjc/react-pretext'
 
-function AccordionBody({ isOpen, text }: { isOpen: boolean; text: string }) {
+function AccordionBody({ isOpen, text, width }: { isOpen: boolean; text: string; width: number }) {
   const typography = createPretextTypography({
     family: 'Inter, sans-serif',
     size: 18,
     weight: 400,
     lineHeight: 28,
-    width: 360,
+    width,
   })
 
   const { height } = useMeasuredText({ text, typography })
@@ -145,6 +183,8 @@ function AccordionBody({ isOpen, text }: { isOpen: boolean; text: string }) {
   )
 }
 ```
+
+Use this when the layout already gives you a stable width and the component needs a predicted height before it opens.
 
 ### Predict measured card or list heights
 

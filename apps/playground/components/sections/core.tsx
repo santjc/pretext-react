@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { PText, createPretextTypography, useElementWidth, useMeasuredText, useTruncatedText } from "@santjc/react-pretext"
 import { ShowcaseDemo } from "@/components/showcase-demo"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 const measureMaxWidth = 400
 
@@ -53,22 +54,26 @@ function AccordionSection({
 
 // Demo 1: Measure
 function MeasureDemo() {
+  const isMobile = useIsMobile()
   const [text, setText] = useState("Predict text height and line count from the same typography definition you already need to render the UI. When width is already known, layout decisions do not need hidden probes or scrollHeight-style DOM reads.")
   const [width, setWidth] = useState(360)
   const [fontSize, setFontSize] = useState(20)
   const [lineHeight, setLineHeight] = useState(30)
   const [fontWeight, setFontWeight] = useState("400")
+  const effectiveWidth = isMobile ? Math.min(width, 240) : width
+  const effectiveFontSize = isMobile ? Math.min(fontSize, 17) : fontSize
+  const effectiveLineHeight = isMobile ? Math.min(lineHeight, 26) : lineHeight
 
   const typography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: fontSize,
+        size: effectiveFontSize,
         weight: Number(fontWeight),
-        lineHeight,
-        width,
+        lineHeight: effectiveLineHeight,
+        width: effectiveWidth,
       }),
-    [fontSize, fontWeight, lineHeight, width],
+    [effectiveFontSize, effectiveLineHeight, effectiveWidth, fontWeight],
   )
 
   const { height, lineCount, isReady } = useMeasuredText({ text, typography })
@@ -93,13 +98,13 @@ const { height, lineCount } = useMeasuredText({ text, typography })`
       metrics={[
         { label: "Preview lines", value: isReady ? lineCount : "--" },
         { label: "Preview height", value: isReady ? height : "--", unit: isReady ? "px" : undefined },
-        { label: "Preview width", value: width, unit: "px" },
+        { label: "Preview width", value: effectiveWidth, unit: "px" },
       ]}
       preview={
-        <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-6">
-          <div className="w-full max-w-full" style={{ maxWidth: `${width + 64}px` }}>
-            <div className="mb-3 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-muted-foreground">
-              <span>Container {width}px</span>
+        <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-4 sm:p-6">
+          <div className="w-full max-w-full" style={{ maxWidth: `${effectiveWidth + 64}px` }}>
+            <div className="mb-3 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <span>Container {effectiveWidth}px</span>
               <span>{isReady ? `${height}px tall` : "Measuring"}</span>
             </div>
             <div className="rounded-[2rem] rounded-bl-md bg-primary px-4 py-3 text-primary-foreground shadow-sm">
@@ -173,18 +178,22 @@ function ResponsiveMeasurePreview({
   fontSize: number
   lineHeight: number
 }) {
+  const isMobile = useIsMobile()
   const { ref, width } = useElementWidth<HTMLDivElement>()
+  const effectiveShellWidth = isMobile ? Math.min(shellWidth, 252) : shellWidth
+  const effectiveFontSize = isMobile ? Math.min(fontSize, 17) : fontSize
+  const effectiveLineHeight = isMobile ? Math.min(lineHeight, 26) : lineHeight
 
   const typography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: fontSize,
+        size: effectiveFontSize,
         weight: 400,
-        lineHeight,
+        lineHeight: effectiveLineHeight,
         width,
       }),
-    [fontSize, lineHeight, width],
+    [effectiveFontSize, effectiveLineHeight, width],
   )
 
   const { height, lineCount, isReady } = useMeasuredText({
@@ -194,15 +203,15 @@ function ResponsiveMeasurePreview({
   })
 
   return (
-    <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-6">
-      <div className="w-full" style={{ maxWidth: `${shellWidth + 64}px` }}>
-        <div className="mb-3 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-muted-foreground">
-          <span>Observed container</span>
-          <span>{width > 0 ? `${Math.round(width)}px measured` : "Waiting for width"}</span>
-        </div>
-        <div className="rounded-2xl border border-border bg-background/80 p-4 shadow-sm" style={{ width: `${shellWidth}px` }}>
+    <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-4 sm:p-6">
+        <div className="w-full" style={{ maxWidth: `${effectiveShellWidth + 64}px` }}>
+          <div className="mb-3 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <span>Observed container</span>
+            <span>{width > 0 ? `${Math.round(width)}px measured` : "Waiting for width"}</span>
+          </div>
+        <div className="max-w-full rounded-2xl border border-border bg-background/80 p-4 shadow-sm" style={{ width: `min(100%, ${effectiveShellWidth}px)` }}>
           <div ref={ref} className="rounded-[1.75rem] rounded-tr-md bg-primary px-4 py-3 text-primary-foreground shadow-sm">
-            <div className="mb-2 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-primary-foreground/70">
+            <div className="mb-2 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider text-primary-foreground/70 sm:flex-row sm:items-center sm:justify-between">
               <span>Live width</span>
               <span>{isReady ? `${height}px tall / ${lineCount} lines` : "Measuring"}</span>
             </div>
@@ -217,22 +226,26 @@ function ResponsiveMeasurePreview({
 }
 
 function ResponsiveWidthDemo() {
+  const isMobile = useIsMobile()
   const [text, setText] = useState("When the layout owns the width, observe the real container and feed that number into useMeasuredText(). This keeps the package grounded in the same responsive box model the UI already uses, instead of relying on a hardcoded demo width.")
   const [shellWidth, setShellWidth] = useState(360)
   const [fontSize, setFontSize] = useState(20)
   const [lineHeight, setLineHeight] = useState(30)
+  const effectiveShellWidth = isMobile ? Math.min(shellWidth, 252) : shellWidth
+  const effectiveFontSize = isMobile ? Math.min(fontSize, 17) : fontSize
+  const effectiveLineHeight = isMobile ? Math.min(lineHeight, 26) : lineHeight
 
-  const observedWidth = Math.max(0, shellWidth - 32)
+  const observedWidth = Math.max(0, effectiveShellWidth - 32)
   const previewTypography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: fontSize,
+        size: effectiveFontSize,
         weight: 400,
-        lineHeight,
+        lineHeight: effectiveLineHeight,
         width: observedWidth,
       }),
-    [fontSize, lineHeight, observedWidth],
+    [effectiveFontSize, effectiveLineHeight, observedWidth],
   )
 
   const previewMeasure = useMeasuredText({
@@ -269,7 +282,7 @@ const { height, lineCount } = useMeasuredText({
       title="Observe responsive width before measuring text"
       description="Use useElementWidth() when the container width comes from the real layout instead of a prop. The observed width becomes the typography input, and useMeasuredText() stays on the same deterministic path."
       metrics={[
-        { label: "Shell width", value: shellWidth, unit: "px" },
+        { label: "Shell width", value: effectiveShellWidth, unit: "px" },
         { label: "Observed width", value: observedWidth, unit: "px" },
         { label: "Predicted height", value: previewMeasure.isReady ? previewMeasure.height : "--", unit: previewMeasure.isReady ? "px" : undefined },
         { label: "Line count", value: previewMeasure.isReady ? previewMeasure.lineCount : "--" },
@@ -318,10 +331,14 @@ const { height, lineCount } = useMeasuredText({
 
 // Demo 2: ScrollHeight Replacement
 function ScrollHeightDemo() {
+  const isMobile = useIsMobile()
   const [accordionWidth, setAccordionWidth] = useState(360)
   const [bodySize, setBodySize] = useState(20)
   const [bodyLeading, setBodyLeading] = useState(30)
   const [openSection, setOpenSection] = useState(0)
+  const effectiveAccordionWidth = isMobile ? Math.min(accordionWidth, 260) : accordionWidth
+  const effectiveBodySize = isMobile ? Math.min(bodySize, 17) : bodySize
+  const effectiveBodyLeading = isMobile ? Math.min(bodyLeading, 26) : bodyLeading
 
   const sections = [
     {
@@ -338,17 +355,17 @@ function ScrollHeightDemo() {
     },
   ]
 
-  const bodyWidth = Math.max(0, accordionWidth - 32)
+  const bodyWidth = Math.max(0, effectiveAccordionWidth - 32)
   const typography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: bodySize,
+        size: effectiveBodySize,
         weight: 400,
-        lineHeight: bodyLeading,
+        lineHeight: effectiveBodyLeading,
         width: bodyWidth,
       }),
-    [bodyLeading, bodySize, bodyWidth],
+    [bodyWidth, effectiveBodyLeading, effectiveBodySize],
   )
 
   const code = `const typography = createPretextTypography({
@@ -372,11 +389,11 @@ const { height } = useMeasuredText({ text, typography })
       description="This is the migration path for normal UI: use measured text height before a panel opens instead of reading scrollHeight after render."
       metrics={[
         { label: "Sections", value: sections.length },
-        { label: "Width", value: accordionWidth, unit: "px" },
+        { label: "Width", value: effectiveAccordionWidth, unit: "px" },
         { label: "Open", value: openSection + 1 },
       ]}
       preview={
-        <div className="space-y-2" style={{ maxWidth: `${accordionWidth}px` }}>
+        <div className="space-y-2" style={{ maxWidth: `${effectiveAccordionWidth}px` }}>
           {sections.map((section, index) => (
             <AccordionSection
               key={section.title}
@@ -429,21 +446,24 @@ const { height } = useMeasuredText({ text, typography })
 
 // Demo 3: Truncate
 function TruncateDemo() {
+  const isMobile = useIsMobile()
   const [text, setText] = useState("Use deterministic preview text in result cards, compact rows, and teasers where the visible copy itself affects layout. The package can return the exact string that fits within a known line budget.")
   const [maxLines, setMaxLines] = useState(3)
   const [width, setWidth] = useState(360)
   const [fontSize, setFontSize] = useState(18)
-  const lineHeight = Math.round(fontSize * 1.5)
+  const effectiveWidth = isMobile ? Math.min(width, 244) : width
+  const effectiveFontSize = isMobile ? Math.min(fontSize, 16) : fontSize
+  const lineHeight = Math.round(effectiveFontSize * 1.5)
 
   const typography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: fontSize,
+        size: effectiveFontSize,
         lineHeight,
-        width,
+        width: effectiveWidth,
       }),
-    [fontSize, lineHeight, width],
+    [effectiveFontSize, effectiveWidth, lineHeight],
   )
 
   const preview = useTruncatedText({
@@ -482,10 +502,10 @@ preview.visibleLineCount`
         { label: "Truncated", value: preview.isReady ? (preview.didTruncate ? "Yes" : "No") : "--" },
       ]}
       preview={
-        <div className="rounded-xl border border-border bg-secondary/20 p-5" style={{ maxWidth: `${width + 40}px` }}>
-          <div className="mb-3 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-muted-foreground">
+        <div className="rounded-xl border border-border bg-secondary/20 p-4 sm:p-5" style={{ maxWidth: `${effectiveWidth + 40}px` }}>
+          <div className="mb-3 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <span>Preview budget</span>
-            <span>{width}px / {maxLines} lines</span>
+            <span>{effectiveWidth}px / {maxLines} lines</span>
           </div>
           <p className="text-foreground whitespace-pre-wrap" style={typography.style}>
             {preview.isReady ? preview.text : ""}
@@ -541,20 +561,24 @@ preview.visibleLineCount`
 }
 
 function PTextDemo() {
+  const isMobile = useIsMobile()
   const [containerWidth, setContainerWidth] = useState(320)
   const [fontSize, setFontSize] = useState(17)
   const [lineHeight, setLineHeight] = useState(26)
   const [measure, setMeasure] = useState({ width: 0, height: 0, lineCount: 0 })
+  const effectiveContainerWidth = isMobile ? Math.min(containerWidth, 244) : containerWidth
+  const effectiveFontSize = isMobile ? Math.min(fontSize, 16) : fontSize
+  const effectiveLineHeight = isMobile ? Math.min(lineHeight, 24) : lineHeight
 
   const typography = useMemo(
     () =>
       createPretextTypography({
         family: "Geist, sans-serif",
-        size: fontSize,
+        size: effectiveFontSize,
         weight: 400,
-        lineHeight,
+        lineHeight: effectiveLineHeight,
       }),
-    [fontSize, lineHeight],
+    [effectiveFontSize, effectiveLineHeight],
   )
 
   const code = `const typography = createPretextTypography({
@@ -589,13 +613,13 @@ const [measure, setMeasure] = useState({ width: 0, height: 0, lineCount: 0 })
         { label: "Line count", value: measure.lineCount || "--" },
       ]}
       preview={
-        <div className="flex min-h-[260px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-6">
-          <div className="w-full" style={{ maxWidth: `${containerWidth + 48}px` }}>
-            <div className="mb-3 flex items-center justify-between text-xs font-mono uppercase tracking-wider text-muted-foreground">
+        <div className="flex min-h-[260px] items-center justify-center rounded-xl border border-dashed border-border bg-secondary/20 p-4 sm:p-6">
+          <div className="w-full" style={{ maxWidth: `${effectiveContainerWidth + 48}px` }}>
+            <div className="mb-3 flex flex-col gap-1 text-xs font-mono uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               <span>Responsive container</span>
-              <span>{containerWidth}px</span>
+              <span>{effectiveContainerWidth}px</span>
             </div>
-            <div className="rounded-xl border border-border bg-background p-4 shadow-sm" style={{ width: `${containerWidth}px` }}>
+            <div className="max-w-full rounded-xl border border-border bg-background p-4 shadow-sm" style={{ width: `min(100%, ${effectiveContainerWidth}px)` }}>
               <PText
                 as="p"
                 typography={typography}
@@ -659,7 +683,8 @@ export function CoreSection() {
         </p>
       </div>
 
-      <nav className="flex items-center gap-4 border-b border-border pb-4">
+      <nav className="overflow-x-auto border-b border-border pb-4">
+        <div className="flex min-w-max items-center gap-4 whitespace-nowrap">
         <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Jump to:</span>
         <a href="#measure" className="text-sm text-foreground hover:text-primary transition-colors">Measure</a>
         <span className="text-muted-foreground">/</span>
@@ -670,6 +695,7 @@ export function CoreSection() {
         <a href="#truncate" className="text-sm text-foreground hover:text-primary transition-colors">Truncate</a>
         <span className="text-muted-foreground">/</span>
         <a href="#ptext" className="text-sm text-foreground hover:text-primary transition-colors">PText</a>
+        </div>
       </nav>
 
       <MeasureDemo />
